@@ -13,13 +13,11 @@ export const initSocket = async (httpServer) => {
     path: '/socket.io',
   })
 
-  // Redis pub/sub adapter — supports multiple server instances
   const pubClient = new Redis(process.env.REDIS_URL)
   const subClient = pubClient.duplicate()
 
   io.adapter(createAdapter(pubClient, subClient))
 
-  // Auth middleware for Socket.IO
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token
 
@@ -39,6 +37,7 @@ export const initSocket = async (httpServer) => {
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id} (user: ${socket.userId})`)
 
+    // Project room for kanban real-time
     socket.on('join:project', (projectId) => {
       socket.join(`project:${projectId}`)
       console.log(`User ${socket.userId} joined project:${projectId}`)
@@ -46,7 +45,16 @@ export const initSocket = async (httpServer) => {
 
     socket.on('leave:project', (projectId) => {
       socket.leave(`project:${projectId}`)
-      console.log(`User ${socket.userId} left project:${projectId}`)
+    })
+
+    // Workspace room for activity feed real-time
+    socket.on('join:workspace', (workspaceId) => {
+      socket.join(`workspace:${workspaceId}`)
+      console.log(`User ${socket.userId} joined workspace:${workspaceId}`)
+    })
+
+    socket.on('leave:workspace', (workspaceId) => {
+      socket.leave(`workspace:${workspaceId}`)
     })
 
     registerKanbanHandlers(io, socket)

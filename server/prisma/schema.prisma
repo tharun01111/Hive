@@ -18,6 +18,8 @@ model User {
   workspaceMembers WorkspaceMember[]
   projectMembers   ProjectMember[]
   assignedCards    CardAssignee[]
+  activities   Activity[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -41,6 +43,7 @@ model Workspace {
   updatedAt   DateTime          @updatedAt
   members     WorkspaceMember[]
   projects    Project[]
+  activities Activity[]
 
   @@map("workspaces")
 }
@@ -128,4 +131,33 @@ model CardAssignee {
 enum Role {
   ADMIN
   MEMBER
+}
+
+model Activity {
+  id          String    @id @default(uuid())
+  workspaceId String
+  projectId   String?
+  userId      String
+  type        String
+  entity      String
+  entityId    String
+  meta        Json?
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activities")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  message   String
+  entityId  String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }
