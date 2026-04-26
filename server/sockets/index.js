@@ -1,6 +1,6 @@
 import { Server } from 'socket.io'
 import { createAdapter } from '@socket.io/redis-adapter'
-import { createClient } from 'ioredis'
+import Redis from 'ioredis'
 import { verifyAccessToken } from '../utils/tokens.js'
 import { registerKanbanHandlers } from './kanban.handlers.js'
 
@@ -14,10 +14,8 @@ export const initSocket = async (httpServer) => {
   })
 
   // Redis pub/sub adapter — supports multiple server instances
-  const pubClient = createClient({ url: process.env.REDIS_URL })
+  const pubClient = new Redis(process.env.REDIS_URL)
   const subClient = pubClient.duplicate()
-
-  await Promise.all([pubClient.connect(), subClient.connect()])
 
   io.adapter(createAdapter(pubClient, subClient))
 
@@ -41,13 +39,11 @@ export const initSocket = async (httpServer) => {
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id} (user: ${socket.userId})`)
 
-    // Join a project room to receive real-time updates
     socket.on('join:project', (projectId) => {
       socket.join(`project:${projectId}`)
       console.log(`User ${socket.userId} joined project:${projectId}`)
     })
 
-    // Leave a project room
     socket.on('leave:project', (projectId) => {
       socket.leave(`project:${projectId}`)
       console.log(`User ${socket.userId} left project:${projectId}`)

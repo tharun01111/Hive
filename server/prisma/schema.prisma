@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -100,15 +99,15 @@ model Column {
 }
 
 model Card {
-  id          String        @id @default(uuid())
+  id          String         @id @default(uuid())
   title       String
   description String?
   order       Int
   dueDate     DateTime?
   columnId    String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  column      Column        @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  column      Column         @relation(fields: [columnId], references: [id], onDelete: Cascade)
   assignees   CardAssignee[]
 
   @@map("cards")
