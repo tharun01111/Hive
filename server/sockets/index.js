@@ -3,6 +3,7 @@ import { createAdapter } from '@socket.io/redis-adapter'
 import Redis from 'ioredis'
 import { verifyAccessToken } from '../utils/tokens.js'
 import { registerKanbanHandlers } from './kanban.handlers.js'
+import { registerChatHandlers } from './chat.handlers.js'
 
 export const initSocket = async (httpServer) => {
   const io = new Server(httpServer, {
@@ -19,7 +20,7 @@ export const initSocket = async (httpServer) => {
   io.adapter(createAdapter(pubClient, subClient))
 
   io.use((socket, next) => {
-    const token = socket.handshake.auth?.token
+    const token = socket.handshake.auth?.token || socket.handshake.query?.token
 
     if (!token) {
       return next(new Error('Authentication required'))
@@ -37,7 +38,6 @@ export const initSocket = async (httpServer) => {
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id} (user: ${socket.userId})`)
 
-    // Project room for kanban real-time
     socket.on('join:project', (projectId) => {
       socket.join(`project:${projectId}`)
       console.log(`User ${socket.userId} joined project:${projectId}`)
@@ -47,7 +47,6 @@ export const initSocket = async (httpServer) => {
       socket.leave(`project:${projectId}`)
     })
 
-    // Workspace room for activity feed real-time
     socket.on('join:workspace', (workspaceId) => {
       socket.join(`workspace:${workspaceId}`)
       console.log(`User ${socket.userId} joined workspace:${workspaceId}`)
@@ -58,6 +57,7 @@ export const initSocket = async (httpServer) => {
     })
 
     registerKanbanHandlers(io, socket)
+    registerChatHandlers(io, socket)
 
     socket.on('disconnect', () => {
       console.log(`Socket disconnected: ${socket.id}`)

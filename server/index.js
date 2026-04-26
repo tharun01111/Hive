@@ -1,33 +1,35 @@
-import "dotenv/config";
-import http from "http";
-import express from "express";
-import cookieParser from "cookie-parser";
-import authRoutes from "./routes/auth.routes.js";
-import workspaceRoutes from "./routes/workspace.routes.js";
-import projectRoutes from "./routes/project.routes.js";
-import kanbanRoutes from "./routes/kanban.routes.js";
-import activityRoutes from "./routes/activity.routes.js";
-import { initSocket } from "./sockets/index.js";
+import 'dotenv/config'
+import http from 'http'
+import express from 'express'
+import cookieParser from 'cookie-parser'
+import authRoutes from './routes/auth.routes.js'
+import workspaceRoutes from './routes/workspace.routes.js'
+import projectRoutes from './routes/project.routes.js'
+import kanbanRoutes from './routes/kanban.routes.js'
+import activityRoutes from './routes/activity.routes.js'
+import messageRoutes from './routes/message.routes.js'
+import { initSocket } from './sockets/index.js'
 
-const app = express();
-const httpServer = http.createServer(app);
-const PORT = process.env.PORT || 3000;
+const app = express()
+const httpServer = http.createServer(app)
+const PORT = process.env.PORT || 3000
 
-app.use(express.json());
-app.use(cookieParser());
+app.use(express.json())
+app.use(cookieParser())
 
-app.use("/api/auth", authRoutes);
-app.use("/api/workspaces", workspaceRoutes);
-app.use("/api/workspaces/:workspaceId/projects", projectRoutes);
-app.use("/api/projects/:projectId", kanbanRoutes);
-app.use("/api", activityRoutes);
+app.use('/api/auth', authRoutes)
+app.use('/api/workspaces', workspaceRoutes)
+app.use('/api/workspaces/:workspaceId/projects', projectRoutes)
+app.use('/api/projects/:projectId', kanbanRoutes)
+app.use('/api/projects/:projectId/messages', messageRoutes)
+app.use('/api', activityRoutes)
 
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", service: "hive-server" });
-});
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', service: 'hive-server' })
+})
 
-await initSocket(httpServer);
+await initSocket(httpServer)
 
 httpServer.listen(PORT, () => {
-  console.log(`Hive server running on port ${PORT}`);
-});
+  console.log(`Hive server running on port ${PORT}`)
+})
