@@ -1,0 +1,15 @@
+node_modules/
+
+.env
+.env.local
+
+
+server/prisma/migrations/
+
+
+postgres_data/
+redis_data/
+
+
+client/dist/
+server/dist/

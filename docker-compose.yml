@@ -1,0 +1,88 @@
+version: "3.9"
+
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - client
+      - server
+    networks:
+      - hive-net
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - VITE_APP_URL=http://localhost/api
+      - VITE_SOCKET_URL=http://localhost
+    networks:
+      - hive-net
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://hive:hive_password@postgres:5432/hive_db
+      - REDIS_URL=redis://redis:6379
+      - JWT_ACCESS_SECRET=change_me_access_secret_dev
+      - JWT_REFRESH_SECRET=change_me_refresh_secret_dev
+      - CLIENT_URL=http://localhost
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - hive-net
+
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"  
+    environment:
+      - POSTGRES_USER=hive
+      - POSTGRES_PASSWORD=hive_password
+      - POSTGRES_DB=hive_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hive -d hive_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hive-net
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hive-net
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  hive-net:
+    driver: bridge
