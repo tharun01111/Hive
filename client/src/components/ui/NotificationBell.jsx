@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNotificationStore } from '../../store/notification.store.js'
 import { getNotificationsApi, markAllAsReadApi } from '../../api/notification.api.js'
 
@@ -6,6 +6,8 @@ export default function NotificationBell() {
   const { notifications, unreadCount, setNotifications, markAllAsRead } =
     useNotificationStore()
   const [open, setOpen] = useState(false)
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 })
+  const bellRef = useRef(null)
 
   useEffect(() => {
     const load = async () => {
@@ -17,8 +19,29 @@ export default function NotificationBell() {
     load()
   }, [])
 
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return
+    const handler = (e) => {
+      if (!bellRef.current?.contains(e.target)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
   const handleOpen = async () => {
+    if (!open && bellRef.current) {
+      const rect = bellRef.current.getBoundingClientRect()
+      setDropdownPos({
+        top: rect.bottom + 8,
+        left: rect.left,
+      })
+    }
+
     setOpen(!open)
+
     if (!open && unreadCount > 0) {
       await markAllAsReadApi()
       markAllAsRead()
@@ -26,7 +49,7 @@ export default function NotificationBell() {
   }
 
   return (
-    <div className="relative">
+    <div ref={bellRef}>
       <button
         onClick={handleOpen}
         className="relative p-1.5 rounded-notion hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
@@ -43,7 +66,10 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-8 w-80 card shadow-notion-lg z-50 overflow-hidden">
+        <div
+          style={{ top: dropdownPos.top, left: dropdownPos.left }}
+          className="fixed w-80 card shadow-notion-lg z-50 overflow-hidden"
+        >
           <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-800">
             <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
               Notifications
@@ -75,13 +101,6 @@ export default function NotificationBell() {
             )}
           </div>
         </div>
-      )}
-
-      {open && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setOpen(false)}
-        />
       )}
     </div>
   )
