@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node start.js && nodemon index.js",
-  "start": "node start.js && node index.js"
+    "dev": "nodemon --legacy-watch index.js",
+    "start": "node index.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",
