@@ -8,6 +8,7 @@ import projectRoutes from './routes/project.routes.js'
 import kanbanRoutes from './routes/kanban.routes.js'
 import activityRoutes from './routes/activity.routes.js'
 import messageRoutes from './routes/message.routes.js'
+import notificationRoutes from './routes/notification.routes.js'
 import { initSocket } from './sockets/index.js'
 
 const app = express()
@@ -22,6 +23,7 @@ app.use('/api/workspaces', workspaceRoutes)
 app.use('/api/workspaces/:workspaceId/projects', projectRoutes)
 app.use('/api/projects/:projectId', kanbanRoutes)
 app.use('/api/projects/:projectId/messages', messageRoutes)
+app.use('/api/notifications', notificationRoutes)
 app.use('/api', activityRoutes)
 
 app.get('/api/health', (req, res) => {

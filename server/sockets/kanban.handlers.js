@@ -1,5 +1,6 @@
 import prisma from '../lib/prisma.js'
 import { logActivity } from '../utils/activity.js'
+import { sendNotification } from '../utils/notification.js'
 
 const cardWithAssignees = {
   assignees: {
@@ -14,9 +15,9 @@ const cardWithAssignees = {
 const getProjectWorkspaceId = async (projectId) => {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { workspaceId: true },
+    select: { workspaceId: true, name: true },
   })
-  return project?.workspaceId
+  return project
 }
 
 export const registerKanbanHandlers = (io, socket) => {
@@ -34,9 +35,9 @@ export const registerKanbanHandlers = (io, socket) => {
 
       io.to(`project:${projectId}`).emit('card:moved', { card, projectId })
 
-      const workspaceId = await getProjectWorkspaceId(projectId)
+      const project = await getProjectWorkspaceId(projectId)
       await logActivity({
-        workspaceId,
+        workspaceId: project.workspaceId,
         projectId,
         userId: socket.userId,
         type: 'CARD_MOVED',
@@ -76,9 +77,9 @@ export const registerKanbanHandlers = (io, socket) => {
 
       io.to(`project:${projectId}`).emit('card:created', { card, projectId })
 
-      const workspaceId = await getProjectWorkspaceId(projectId)
+      const project = await getProjectWorkspaceId(projectId)
       await logActivity({
-        workspaceId,
+        workspaceId: project.workspaceId,
         projectId,
         userId: socket.userId,
         type: 'CARD_CREATED',
@@ -110,9 +111,9 @@ export const registerKanbanHandlers = (io, socket) => {
 
       io.to(`project:${projectId}`).emit('card:updated', { card, projectId })
 
-      const workspaceId = await getProjectWorkspaceId(projectId)
+      const project = await getProjectWorkspaceId(projectId)
       await logActivity({
-        workspaceId,
+        workspaceId: project.workspaceId,
         projectId,
         userId: socket.userId,
         type: 'CARD_UPDATED',
@@ -137,9 +138,9 @@ export const registerKanbanHandlers = (io, socket) => {
 
       io.to(`project:${projectId}`).emit('card:deleted', { cardId, projectId })
 
-      const workspaceId = await getProjectWorkspaceId(projectId)
+      const project = await getProjectWorkspaceId(projectId)
       await logActivity({
-        workspaceId,
+        workspaceId: project.workspaceId,
         projectId,
         userId: socket.userId,
         type: 'CARD_DELETED',
@@ -151,6 +152,84 @@ export const registerKanbanHandlers = (io, socket) => {
     } catch (err) {
       console.error('Socket card:delete error:', err)
       socket.emit('error', { message: 'Failed to delete card' })
+    }
+  })
+
+  socket.on('card:assign', async (data) => {
+    const { cardId, userId, projectId } = data
+    if (!cardId || !userId || !projectId) return
+
+    console.log("Card assigned to: ", cardId, userId, projectId);
+
+    try {
+      const existing = await prisma.cardAssignee.findUnique({
+        where: { cardId_userId: { cardId, userId } },
+      })
+
+      if (existing) return
+
+      await prisma.cardAssignee.create({
+        data: { cardId, userId },
+      })
+
+      const card = await prisma.card.findUnique({
+        where: { id: cardId },
+        include: cardWithAssignees,
+      })
+
+      io.to(`project:${projectId}`).emit('card:assigned', { card, projectId })
+
+      // Notify the assigned user — only if they didn't assign themselves
+      if (userId !== socket.userId) {
+        const assigner = await prisma.user.findUnique({
+          where: { id: socket.userId },
+          select: { name: true },
+        })
+
+        await sendNotification({
+          userId,
+          type: 'CARD_ASSIGNED',
+          message: `${assigner.name} assigned you to "${card.title}"`,
+          entityId: cardId,
+          io,
+        })
+      }
+
+      const project = await getProjectWorkspaceId(projectId)
+      await logActivity({
+        workspaceId: project.workspaceId,
+        projectId,
+        userId: socket.userId,
+        type: 'CARD_ASSIGNED',
+        entity: 'card',
+        entityId: cardId,
+        meta: { title: card.title, assignedUserId: userId },
+        io,
+      })
+    } catch (err) {
+      console.error('Socket card:assign error:', err)
+      socket.emit('error', { message: 'Failed to assign card' })
+    }
+  })
+
+  socket.on('card:unassign', async (data) => {
+    const { cardId, userId, projectId } = data
+    if (!cardId || !userId || !projectId) return
+
+    try {
+      await prisma.cardAssignee.delete({
+        where: { cardId_userId: { cardId, userId } },
+      })
+
+      const card = await prisma.card.findUnique({
+        where: { id: cardId },
+        include: cardWithAssignees,
+      })
+
+      io.to(`project:${projectId}`).emit('card:unassigned', { card, projectId })
+    } catch (err) {
+      console.error('Socket card:unassign error:', err)
+      socket.emit('error', { message: 'Failed to unassign card' })
     }
   })
 
@@ -173,9 +252,9 @@ export const registerKanbanHandlers = (io, socket) => {
 
       io.to(`project:${projectId}`).emit('column:created', { column, projectId })
 
-      const workspaceId = await getProjectWorkspaceId(projectId)
+      const project = await getProjectWorkspaceId(projectId)
       await logActivity({
-        workspaceId,
+        workspaceId: project.workspaceId,
         projectId,
         userId: socket.userId,
         type: 'COLUMN_CREATED',
@@ -202,9 +281,9 @@ export const registerKanbanHandlers = (io, socket) => {
 
       io.to(`project:${projectId}`).emit('column:updated', { column, projectId })
 
-      const workspaceId = await getProjectWorkspaceId(projectId)
+      const project = await getProjectWorkspaceId(projectId)
       await logActivity({
-        workspaceId,
+        workspaceId: project.workspaceId,
         projectId,
         userId: socket.userId,
         type: 'COLUMN_UPDATED',
@@ -229,9 +308,9 @@ export const registerKanbanHandlers = (io, socket) => {
 
       io.to(`project:${projectId}`).emit('column:deleted', { columnId, projectId })
 
-      const workspaceId = await getProjectWorkspaceId(projectId)
+      const project = await getProjectWorkspaceId(projectId)
       await logActivity({
-        workspaceId,
+        workspaceId: project.workspaceId,
         projectId,
         userId: socket.userId,
         type: 'COLUMN_DELETED',
