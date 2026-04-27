@@ -9,13 +9,13 @@ import {
 const REFRESH_TOKEN_EXPIRY_DAYS = 7;
 
 const setRefreshTokenCookie = (res, token) => {
-  res.cookie("refreshToken", token, {
+  res.cookie('refreshToken', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: false, // false in dev — no HTTPS locally
+    sameSite: 'lax', // changed from strict to lax
     maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
-  });
-};
+  })
+}
 
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
