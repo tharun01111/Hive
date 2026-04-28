@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import {
   getMessages,
-  createMessage,
-  deleteMessage,
+  createMessageController,
+  deleteMessageController,
 } from '../controllers/message.controller.js'
 import { authenticate } from '../middleware/auth.js'
 import { requireProjectMember } from '../middleware/workspace.js'
@@ -13,7 +13,7 @@ router.use(authenticate)
 router.use(requireProjectMember)
 
 router.get('/', getMessages)
-router.post('/', createMessage)
-router.delete('/:messageId', deleteMessage)
+router.post('/', createMessageController)
+router.delete('/:messageId', deleteMessageController)
 
 export default router

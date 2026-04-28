@@ -1,25 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNotificationStore } from '../../store/notification.store.js'
-import { getNotificationsApi, markAllAsReadApi } from '../../api/notification.api.js'
+import { useNotifications } from '../../hooks/useNotifications.js'
+import { markAllAsReadApi } from '../../api/notification.api.js'
 
 export default function NotificationBell() {
-  const { notifications, unreadCount, setNotifications, markAllAsRead } =
-    useNotificationStore()
+  const { notifications, unreadCount } = useNotifications()
+  const markAllAsRead = useNotificationStore((s) => s.markAllAsRead)
   const [open, setOpen] = useState(false)
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 })
   const bellRef = useRef(null)
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await getNotificationsApi()
-        setNotifications(data.notifications, data.unreadCount)
-      } catch {}
-    }
-    load()
-  }, [])
-
-  // Close on outside click
   useEffect(() => {
     if (!open) return
     const handler = (e) => {
@@ -36,7 +26,7 @@ export default function NotificationBell() {
       const rect = bellRef.current.getBoundingClientRect()
       setDropdownPos({
         top: rect.bottom + 8,
-        left: rect.left,
+        left: rect.left - 260,
       })
     }
 
