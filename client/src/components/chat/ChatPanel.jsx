@@ -1,34 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
-import { useChatStore } from '../../store/chat.store.js'
 import { useAuthStore } from '../../store/auth.store.js'
-import { getMessagesApi } from '../../api/message.api.js'
+import { useMessages } from '../../hooks/useMessages.js'
+import { useChatStore } from '../../store/chat.store.js'
 import { getSocket } from '../../socket/socket.js'
 
 export default function ChatPanel({ projectId, onClose }) {
   const user = useAuthStore((s) => s.user)
-  const { messages, nextCursor, setMessages, prependMessages, typingUsers } =
-    useChatStore()
+  const { messages, nextCursor, loadingMore, loadMore } = useMessages(projectId)
+  const typingUsers = useChatStore((s) => s.typingUsers)
   const [content, setContent] = useState('')
-  const [loadingMore, setLoadingMore] = useState(false)
   const messagesEndRef = useRef(null)
   const typingTimeoutRef = useRef(null)
   const socket = getSocket()
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await getMessagesApi(projectId)
-        setMessages(data.messages, data.nextCursor)
-      } catch (err) {
-        console.error('Failed to load messages', err)
-      }
-    }
-    load()
-
-    return () => {
-      useChatStore.getState().clearChat()
-    }
-  }, [projectId])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -37,36 +20,19 @@ export default function ChatPanel({ projectId, onClose }) {
   const handleSend = (e) => {
     e.preventDefault()
     if (!content.trim()) return
-
     socket?.emit('message:send', { projectId, content: content.trim() })
     setContent('')
-
     socket?.emit('typing:stop', { projectId })
     clearTimeout(typingTimeoutRef.current)
   }
 
   const handleTyping = (e) => {
     setContent(e.target.value)
-
     socket?.emit('typing:start', { projectId, userName: user?.name })
-
     clearTimeout(typingTimeoutRef.current)
     typingTimeoutRef.current = setTimeout(() => {
       socket?.emit('typing:stop', { projectId })
     }, 2000)
-  }
-
-  const handleLoadMore = async () => {
-    if (!nextCursor || loadingMore) return
-    setLoadingMore(true)
-    try {
-      const { data } = await getMessagesApi(projectId, nextCursor)
-      prependMessages(data.messages, data.nextCursor)
-    } catch (err) {
-      console.error('Failed to load more messages', err)
-    } finally {
-      setLoadingMore(false)
-    }
   }
 
   return (
@@ -89,7 +55,7 @@ export default function ChatPanel({ projectId, onClose }) {
       {nextCursor && (
         <div className="px-4 pt-2">
           <button
-            onClick={handleLoadMore}
+            onClick={loadMore}
             disabled={loadingMore}
             className="w-full text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 py-1"
           >

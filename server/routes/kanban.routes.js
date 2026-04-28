@@ -1,20 +1,20 @@
 import { Router } from 'express'
 import {
-  createColumn,
-  getColumns,
-  updateColumn,
-  deleteColumn,
-  reorderColumns,
+  getColumnsController,
+  createColumnController,
+  updateColumnController,
+  deleteColumnController,
+  reorderColumnsController,
 } from '../controllers/column.controller.js'
 import {
-  createCard,
-  getCard,
-  updateCard,
-  deleteCard,
-  moveCard,
-  reorderCards,
-  assignCard,
-  unassignCard,
+  createCardController,
+  getCardController,
+  updateCardController,
+  deleteCardController,
+  moveCardController,
+  reorderCardsController,
+  assignCardController,
+  unassignCardController,
 } from '../controllers/card.controller.js'
 import { authenticate } from '../middleware/auth.js'
 import { requireProjectMember } from '../middleware/workspace.js'
@@ -24,21 +24,19 @@ const router = Router({ mergeParams: true })
 router.use(authenticate)
 router.use(requireProjectMember)
 
-// Column routes
-router.post('/columns', createColumn)
-router.get('/columns', getColumns)
-router.put('/columns/reorder', reorderColumns)
-router.put('/columns/:columnId', updateColumn)
-router.delete('/columns/:columnId', deleteColumn)
+router.post('/columns', createColumnController)
+router.get('/columns', getColumnsController)
+router.put('/columns/reorder', reorderColumnsController)
+router.put('/columns/:columnId', updateColumnController)
+router.delete('/columns/:columnId', deleteColumnController)
 
-// Card routes
-router.post('/columns/:columnId/cards', createCard)
-router.get('/cards/:cardId', getCard)
-router.put('/cards/reorder', reorderCards)
-router.put('/cards/:cardId', updateCard)
-router.put('/cards/:cardId/move', moveCard)
-router.delete('/cards/:cardId', deleteCard)
-router.post('/cards/:cardId/assign', assignCard)
-router.delete('/cards/:cardId/assign/:userId', unassignCard)
+router.post('/columns/:columnId/cards', createCardController)
+router.get('/cards/:cardId', getCardController)
+router.put('/cards/reorder', reorderCardsController)
+router.put('/cards/:cardId', updateCardController)
+router.put('/cards/:cardId/move', moveCardController)
+router.delete('/cards/:cardId', deleteCardController)
+router.post('/cards/:cardId/assign', assignCardController)
+router.delete('/cards/:cardId/assign/:userId', unassignCardController)
 
 export default router

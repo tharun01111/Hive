@@ -1,63 +1,33 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useWorkspaceStore } from '../../store/workspace.store.js'
 import { useProjectStore } from '../../store/project.store.js'
-import { getWorkspacesApi, createWorkspaceApi } from '../../api/workspace.api.js'
-import { getProjectsApi, createProjectApi } from '../../api/project.api.js'
+import { useWorkspaces } from '../../hooks/useWorkspaces.js'
+import { useProjects } from '../../hooks/useProjects.js'
+import { createWorkspaceApi } from '../../api/workspace.api.js'
+import { createProjectApi } from '../../api/project.api.js'
 import AppLayout from '../../components/layout/AppLayout.jsx'
 import Modal from '../../components/ui/Modal.jsx'
+import WorkspaceMembersModal from '../../components/members/WorkspaceMembersModal.jsx'
 
 export default function WorkspacePage() {
   const { workspaceId } = useParams()
   const navigate = useNavigate()
 
-  const { workspaces, setWorkspaces, activeWorkspace, setActiveWorkspace, addWorkspace } =
-    useWorkspaceStore()
-  const { projects, setProjects, addProject } = useProjectStore()
+  const { activeWorkspace, setActiveWorkspace, addWorkspace } = useWorkspaceStore()
+  const { addProject } = useProjectStore()
+
+  const { workspaces } = useWorkspaces()
+  const { projects } = useProjects(activeWorkspace?.id)
 
   const [showCreateWorkspace, setShowCreateWorkspace] = useState(false)
   const [showCreateProject, setShowCreateProject] = useState(false)
+  const [showMembers, setShowMembers] = useState(false)
   const [wsForm, setWsForm] = useState({ name: '', description: '' })
   const [projForm, setProjForm] = useState({ name: '', description: '' })
   const [wsLoading, setWsLoading] = useState(false)
   const [projLoading, setProjLoading] = useState(false)
   const [error, setError] = useState('')
-
-  // Load workspaces on mount
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await getWorkspacesApi()
-        setWorkspaces(data.workspaces)
-
-        if (data.workspaces.length > 0) {
-          const target = workspaceId
-            ? data.workspaces.find((w) => w.id === workspaceId)
-            : data.workspaces[0]
-          if (target) {
-            setActiveWorkspace(target)
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load workspaces', err)
-      }
-    }
-    load()
-  }, [])
-
-  // Load projects when active workspace changes
-  useEffect(() => {
-    if (!activeWorkspace) return
-    const load = async () => {
-      try {
-        const { data } = await getProjectsApi(activeWorkspace.id)
-        setProjects(data.projects)
-      } catch (err) {
-        console.error('Failed to load projects', err)
-      }
-    }
-    load()
-  }, [activeWorkspace?.id])
 
   const handleCreateWorkspace = async (e) => {
     e.preventDefault()
@@ -112,6 +82,15 @@ export default function WorkspacePage() {
             )}
           </div>
           <div className="flex items-center gap-2">
+            {activeWorkspace && (
+              <button
+                onClick={() => setShowMembers(true)}
+                className="btn-ghost flex items-center gap-1.5"
+              >
+                <MembersIcon />
+                Members
+              </button>
+            )}
             <button
               onClick={() => setShowCreateWorkspace(true)}
               className="btn-secondary"
@@ -129,7 +108,7 @@ export default function WorkspacePage() {
           </div>
         </div>
 
-        {/* Empty state — no workspaces */}
+        {/* Empty state */}
         {workspaces.length === 0 && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-notion flex items-center justify-center mb-4">
@@ -177,7 +156,7 @@ export default function WorkspacePage() {
                   <button
                     key={project.id}
                     onClick={() => navigate(`/project/${project.id}`)}
-                    className="card p-5 text-left hover:shadow-notion-md transition-shadow duration-150 group"
+                    className="card p-5 text-left hover:shadow-notion-md transition-shadow duration-150"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-notion flex items-center justify-center">
@@ -324,9 +303,24 @@ export default function WorkspacePage() {
           </div>
         </form>
       </Modal>
+
+      {/* Members Modal */}
+      <WorkspaceMembersModal
+        isOpen={showMembers}
+        onClose={() => setShowMembers(false)}
+      />
     </AppLayout>
   )
 }
+
+const MembersIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <circle cx="5" cy="4" r="2" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="10" cy="4" r="2" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M1 12c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M10 8c1.7.3 3 1.8 3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+)
 
 const HiveIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

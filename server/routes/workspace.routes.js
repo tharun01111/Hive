@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import {
-  createWorkspace,
+  createWorkspaceController,
   getMyWorkspaces,
   getWorkspace,
-  updateWorkspace,
-  deleteWorkspace,
+  updateWorkspaceController,
+  deleteWorkspaceController,
   inviteMember,
   removeMember,
 } from '../controllers/workspace.controller.js'
@@ -18,11 +18,11 @@ const router = Router()
 
 router.use(authenticate)
 
-router.post('/', createWorkspace)
+router.post('/', createWorkspaceController)
 router.get('/', getMyWorkspaces)
 router.get('/:workspaceId', requireWorkspaceMember, getWorkspace)
-router.put('/:workspaceId', requireWorkspaceAdmin, updateWorkspace)
-router.delete('/:workspaceId', requireWorkspaceAdmin, deleteWorkspace)
+router.put('/:workspaceId', requireWorkspaceAdmin, updateWorkspaceController)
+router.delete('/:workspaceId', requireWorkspaceAdmin, deleteWorkspaceController)
 router.post('/:workspaceId/invite', requireWorkspaceAdmin, inviteMember)
 router.delete('/:workspaceId/members/:userId', requireWorkspaceAdmin, removeMember)
 

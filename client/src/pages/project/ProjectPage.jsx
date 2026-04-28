@@ -1,43 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useProjectStore } from '../../store/project.store.js'
-import { useKanbanStore } from '../../store/kanban.store.js'
-import { getProjectApi } from '../../api/project.api.js'
-import { getColumnsApi } from '../../api/kanban.api.js'
+import { useProject } from '../../hooks/useProject.js'
 import { useSocketEvents } from '../../socket/useSocketEvents.js'
 import AppLayout from '../../components/layout/AppLayout.jsx'
 import KanbanBoard from '../../components/kanban/KanbanBoard.jsx'
 import ChatPanel from '../../components/chat/ChatPanel.jsx'
+import ProjectMembersModal from '../../components/members/ProjectMembersModal.jsx'
+import { useProjectStore } from '../../store/project.store.js'
 
 export default function ProjectPage() {
   const { projectId } = useParams()
-  const { setActiveProject, activeProject } = useProjectStore()
-  const { setColumns } = useKanbanStore()
-  const [loading, setLoading] = useState(true)
+  const { loading } = useProject(projectId)
+  const activeProject = useProjectStore((s) => s.activeProject)
   const [chatOpen, setChatOpen] = useState(false)
+  const [showMembers, setShowMembers] = useState(false)
 
   useSocketEvents(projectId)
-
-  useEffect(() => {
-    if (!projectId) return
-
-    const load = async () => {
-      try {
-        const [projectRes, columnsRes] = await Promise.all([
-          getProjectApi(projectId),
-          getColumnsApi(projectId),
-        ])
-        setActiveProject(projectRes.data.project)
-        setColumns(columnsRes.data.columns)
-      } catch (err) {
-        console.error('Failed to load project', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    load()
-  }, [projectId])
 
   if (loading) {
     return (
@@ -66,17 +44,26 @@ export default function ProjectPage() {
                 </p>
               )}
             </div>
-            <button
-              onClick={() => setChatOpen(!chatOpen)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-notion text-sm transition-colors ${
-                chatOpen
-                  ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
-                  : 'btn-secondary'
-              }`}
-            >
-              <ChatIcon />
-              Chat
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowMembers(true)}
+                className="btn-secondary flex items-center gap-1.5"
+              >
+                <MembersIcon />
+                Members
+              </button>
+              <button
+                onClick={() => setChatOpen(!chatOpen)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-notion text-sm transition-colors ${
+                  chatOpen
+                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
+                    : 'btn-secondary'
+                }`}
+              >
+                <ChatIcon />
+                Chat
+              </button>
+            </div>
           </div>
 
           {/* Kanban board */}
@@ -93,9 +80,23 @@ export default function ProjectPage() {
           />
         )}
       </div>
+
+      <ProjectMembersModal
+        isOpen={showMembers}
+        onClose={() => setShowMembers(false)}
+      />
     </AppLayout>
   )
 }
+
+const MembersIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <circle cx="5" cy="4" r="2" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="10" cy="4" r="2" stroke="currentColor" strokeWidth="1.5"/>
+    <path d="M1 12c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M10 8c1.7.3 3 1.8 3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+)
 
 const ChatIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">

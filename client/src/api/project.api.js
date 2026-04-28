@@ -14,3 +14,6 @@ export const updateProjectApi = (projectId, data) =>
 
 export const deleteProjectApi = (projectId) =>
   api.delete(`/projects/direct/${projectId}`);
+
+export const inviteProjectMemberApi = (projectId, data) =>
+  api.post(`/projects/${projectId}/invite`, data);
