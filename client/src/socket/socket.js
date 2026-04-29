@@ -5,7 +5,9 @@ let socket = null;
 export const initSocket = (token) => {
   if (socket) return socket;
 
-  socket = io("/", {
+  const url = import.meta.env.VITE_SOCKET_URL ?? "/";
+
+  socket = io(url, {
     auth: { token },
     path: "/socket.io",
     transports: ["websocket", "polling"],
