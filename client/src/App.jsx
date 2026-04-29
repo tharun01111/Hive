@@ -37,12 +37,11 @@ export default function App() {
   const setAuth = useAuthStore((s) => s.setAuth)
   const setAccessToken = useAuthStore((s) => s.setAccessToken)
   const logout = useAuthStore((s) => s.logout)
-  const setLoading = useAuthStore((s) => s.setLoading)
   const accessToken = useAuthStore((s) => s.accessToken)
   const bootstrapped = useRef(false)
 
   useEffect(() => {
-    // Guard against double execution
+    // Guard against double execution — runs once intentionally
     if (bootstrapped.current) return
     bootstrapped.current = true
 
@@ -58,6 +57,7 @@ export default function App() {
     }
 
     bootstrap()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {

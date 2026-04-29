@@ -28,6 +28,7 @@ export const useProject = (projectId) => {
       }
     }
     load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId])
 
   return { activeProject, loading, error }

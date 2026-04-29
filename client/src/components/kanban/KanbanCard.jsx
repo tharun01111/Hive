@@ -1,11 +1,8 @@
 import { useState } from 'react'
 import { Draggable } from '@hello-pangea/dnd'
-import { useKanbanStore } from '../../store/kanban.store.js'
-import { getSocket } from '../../socket/socket.js'
 import CardDetailModal from './CardDetailModal.jsx'
 
 export default function KanbanCard({ card, index, projectId }) {
-  const removeCard = useKanbanStore((s) => s.removeCard)
   const [showDetail, setShowDetail] = useState(false)
 
   return (

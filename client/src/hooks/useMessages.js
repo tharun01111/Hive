@@ -22,6 +22,7 @@ export const useMessages = (projectId) => {
     load()
 
     return () => useChatStore.getState().clearChat()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId])
 
   const loadMore = async () => {

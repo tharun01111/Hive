@@ -33,6 +33,14 @@ app.get("/api/health", (req, res) => {
 
 await initSocket(httpServer);
 
+// Global error handler — catches anything that slips past controllerHandler
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(err.status ?? 500).json({
+    error: err.message ?? "Internal server error",
+  });
+});
+
 httpServer.listen(PORT, () => {
   console.log(`Hive server running on port ${PORT}`);
 });
