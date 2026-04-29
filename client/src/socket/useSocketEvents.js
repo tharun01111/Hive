@@ -72,5 +72,6 @@ export const useSocketEvents = (projectId) => {
       socket.off('typing:stopped')
       socket.off('notification:new')
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId])
 }

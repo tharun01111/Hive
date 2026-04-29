@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { DragDropContext, Droppable } from '@hello-pangea/dnd'
 import { useKanbanStore } from '../../store/kanban.store.js'
 import { getSocket } from '../../socket/socket.js'

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useKanbanStore } from '../../store/kanban.store.js'
 import { getSocket } from '../../socket/socket.js'
 
 export default function AddColumnButton({ projectId }) {

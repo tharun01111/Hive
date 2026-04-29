@@ -22,6 +22,7 @@ export const useProjects = (workspaceId) => {
       }
     }
     load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId])
 
   return { projects, loading, error }

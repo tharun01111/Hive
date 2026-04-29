@@ -10,7 +10,7 @@ import ThemeToggle from '../ui/ThemeToggle.jsx'
 
 export default function Sidebar({ isOpen, onToggle }) {
   const navigate = useNavigate()
-  const { workspaceId, projectId } = useParams()
+  const { projectId } = useParams()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
   const workspaces = useWorkspaceStore((s) => s.workspaces)
