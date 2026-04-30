@@ -1,8 +1,15 @@
+import { motion as Motion } from "framer-motion";
 import ActivityFeed from "./ActivityFeed.jsx";
 
 export default function ActivityPanel({ onClose }) {
   return (
-    <div className="w-80 shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col h-full">
+    <Motion.aside
+      initial={{ opacity: 0, x: 18 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 18 }}
+      transition={{ duration: 0.18 }}
+      className="w-80 shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col h-full bg-white dark:bg-neutral-950"
+    >
       <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
         <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
           Activity
@@ -19,7 +26,7 @@ export default function ActivityPanel({ onClose }) {
       <div className="flex-1 overflow-y-auto px-3 py-2">
         <ActivityFeed />
       </div>
-    </div>
+    </Motion.aside>
   );
 }
 

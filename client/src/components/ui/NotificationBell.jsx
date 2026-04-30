@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNotificationStore } from "../../store/notification.store.js";
 import { useNotifications } from "../../hooks/useNotifications.js";
 import { markAllAsReadApi } from "../../api/notification.api.js";
+import EmptyState from "./EmptyState.jsx";
 
 export default function NotificationBell() {
   const { notifications, unreadCount } = useNotifications();
@@ -71,11 +72,12 @@ export default function NotificationBell() {
           </div>
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center">
-                <p className="text-sm text-neutral-400 dark:text-neutral-600">
-                  No notifications yet
-                </p>
-              </div>
+              <EmptyState
+                compact
+                icon={<BellIcon />}
+                title="You are all caught up"
+                description="Mentions, assignments, and workspace updates will appear here."
+              />
             ) : (
               notifications.map((n) => (
                 <div

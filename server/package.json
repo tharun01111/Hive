@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "node start.js && nodemon --legacy-watch index.js",
-    "start": "node start.js --serve"
+    "start": "node start.js --serve",
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { useWorkspaceStore } from "../../store/workspace.store.js";
 import { useProjectStore } from "../../store/project.store.js";
 import { useWorkspaces } from "../../hooks/useWorkspaces.js";
@@ -10,6 +11,8 @@ import AppLayout from "../../components/layout/AppLayout.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import WorkspaceMembersModal from "../../components/members/WorkspaceMembersModal.jsx";
 import ActivityPanel from "../../components/activity/ActivityPanel.jsx";
+import EmptyState from "../../components/ui/EmptyState.jsx";
+import { AvatarStack } from "../../components/ui/Avatar.jsx";
 
 export default function WorkspacePage() {
   const navigate = useNavigate();
@@ -73,9 +76,9 @@ export default function WorkspacePage() {
         <div className="flex-1 overflow-y-auto">
           <div className="p-8 max-w-4xl mx-auto">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between gap-4 mb-8">
               <div>
-                <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
+                <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
                   {activeWorkspace?.name ?? "Welcome to Hive"}
                 </h1>
                 {activeWorkspace?.description && (
@@ -108,8 +111,6 @@ export default function WorkspacePage() {
                     New project
                   </button>
                 )}
-              </div>
-              <div>
                 {activeWorkspace && (
                   <button
                     onClick={() => setShowActivity(!showActivity)}
@@ -128,24 +129,19 @@ export default function WorkspacePage() {
 
             {/* Empty state */}
             {workspaces.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-24 text-center">
-                <div className="w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-notion flex items-center justify-center mb-4">
-                  <HiveIcon />
-                </div>
-                <h2 className="text-lg font-medium text-neutral-900 dark:text-neutral-100 mb-2">
-                  Create your first workspace
-                </h2>
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6 max-w-sm">
-                  Workspaces are where your team collaborates. Create one to get
-                  started.
-                </p>
-                <button
-                  onClick={() => setShowCreateWorkspace(true)}
-                  className="btn-primary"
-                >
-                  Create workspace
-                </button>
-              </div>
+              <EmptyState
+                icon={<HiveIcon />}
+                title="Create your first workspace"
+                description="Bring your team, projects, and conversations into one place."
+                action={
+                  <button
+                    onClick={() => setShowCreateWorkspace(true)}
+                    className="btn-primary"
+                  >
+                    Create workspace
+                  </button>
+                }
+              />
             )}
 
             {/* Projects grid */}
@@ -158,16 +154,20 @@ export default function WorkspacePage() {
                 </div>
 
                 {projects.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-notion">
-                    <p className="text-sm text-neutral-400 dark:text-neutral-600 mb-4">
-                      No projects yet
-                    </p>
-                    <button
-                      onClick={() => setShowCreateProject(true)}
-                      className="btn-secondary"
-                    >
-                      Create first project
-                    </button>
+                  <div className="border border-dashed border-neutral-200 dark:border-neutral-800 rounded-notion">
+                    <EmptyState
+                      icon={<ProjectEmptyIcon />}
+                      title="No projects yet"
+                      description="Create your first project and give this workspace a mission."
+                      action={
+                        <button
+                          onClick={() => setShowCreateProject(true)}
+                          className="btn-secondary"
+                        >
+                          Create first project
+                        </button>
+                      }
+                    />
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -193,18 +193,11 @@ export default function WorkspacePage() {
                           </p>
                         )}
                         <div className="mt-3 flex items-center gap-2">
-                          <div className="flex -space-x-1">
-                            {project.members?.slice(0, 3).map((m) => (
-                              <div
-                                key={m.id}
-                                className="w-5 h-5 rounded-full bg-neutral-200 dark:bg-neutral-700 border border-white dark:border-neutral-900 flex items-center justify-center"
-                              >
-                                <span className="text-xs text-neutral-600 dark:text-neutral-300">
-                                  {m.user.name[0].toUpperCase()}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
+                          <AvatarStack
+                            members={(project.members ?? []).map((m) => m.user)}
+                            limit={3}
+                            size="sm"
+                          />
                           <span className="text-xs text-neutral-400 dark:text-neutral-600">
                             {project.members?.length} member
                             {project.members?.length !== 1 ? "s" : ""}
@@ -219,9 +212,11 @@ export default function WorkspacePage() {
           </div>
         </div>
         {/* Activity panel */}
-        {showActivity && activeWorkspace && (
-          <ActivityPanel onClose={() => setShowActivity(false)} />
-        )}
+        <AnimatePresence>
+          {showActivity && activeWorkspace && (
+            <ActivityPanel onClose={() => setShowActivity(false)} />
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Create Workspace Modal */}
@@ -399,6 +394,18 @@ const ActivityIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
     <path
       d="M1 7h2l2-4 2 8 2-6 2 4h2"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const ProjectEmptyIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path
+      d="M4 5h12v10H4V5zM7 8h6M7 11h4"
       stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"

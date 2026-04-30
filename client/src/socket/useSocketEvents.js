@@ -3,6 +3,7 @@ import { getSocket } from "./socket.js";
 import { useKanbanStore } from "../store/kanban.store.js";
 import { useChatStore } from "../store/chat.store.js";
 import { useNotificationStore } from "../store/notification.store.js";
+import { usePresenceStore } from "../store/presence.store.js";
 
 export const useSocketEvents = (projectId) => {
   const addColumn = useKanbanStore((s) => s.addColumn);
@@ -19,12 +20,17 @@ export const useSocketEvents = (projectId) => {
   const removeTypingUser = useChatStore((s) => s.removeTypingUser);
 
   const addNotification = useNotificationStore((s) => s.addNotification);
+  const setProjectUsers = usePresenceStore((s) => s.setProjectUsers);
+  const clearPresence = usePresenceStore((s) => s.clearPresence);
 
   useEffect(() => {
     const socket = getSocket();
     if (!socket || !projectId) return;
 
     socket.emit("join:project", projectId);
+    const heartbeat = window.setInterval(() => {
+      socket.emit("presence:heartbeat", { projectId });
+    }, 30000);
 
     socket.on("card:created", ({ card }) => addCard(card));
     socket.on("card:updated", ({ card }) => updateCard(card));
@@ -57,8 +63,10 @@ export const useSocketEvents = (projectId) => {
     socket.on("notification:new", ({ notification }) =>
       addNotification(notification),
     );
+    socket.on("presence:update", ({ users }) => setProjectUsers(users));
 
     return () => {
+      window.clearInterval(heartbeat);
       socket.emit("leave:project", projectId);
       socket.off("card:created");
       socket.off("card:updated");
@@ -75,6 +83,8 @@ export const useSocketEvents = (projectId) => {
       socket.off("typing:started");
       socket.off("typing:stopped");
       socket.off("notification:new");
+      socket.off("presence:update");
+      clearPresence();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);

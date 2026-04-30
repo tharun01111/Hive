@@ -1,0 +1,152 @@
+import { Link } from "react-router-dom";
+import { motion as Motion } from "framer-motion";
+import ThemeToggle from "../../components/ui/ThemeToggle.jsx";
+import { AvatarStack } from "../../components/ui/Avatar.jsx";
+
+const demoUsers = [
+  { id: "1", name: "Tharun" },
+  { id: "2", name: "Aisha" },
+  { id: "3", name: "Maya" },
+];
+
+const features = [
+  ["Realtime Kanban", "Move cards, organize columns, and keep everyone aligned as work changes."],
+  ["Project Chat", "Keep discussion beside the board instead of scattering context across tools."],
+  ["Activity Feed", "See the heartbeat of your workspace through card, column, and member updates."],
+  ["Team Workspaces", "Separate teams, projects, members, and permissions cleanly."],
+];
+
+export default function LandingPage() {
+  return (
+    <div className="min-h-screen overflow-hidden bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(115,115,115,0.22),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(64,64,64,0.22),transparent_28%)]" />
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-notion bg-neutral-900 text-sm font-semibold text-white dark:bg-white dark:text-neutral-900">
+            H
+          </div>
+          <span className="text-sm font-semibold">Hive</span>
+        </Link>
+        <nav className="flex items-center gap-2">
+          <ThemeToggle />
+          <Link to="/login" className="btn-ghost">
+            Log in
+          </Link>
+          <Link to="/register" className="btn-primary">
+            Start workspace
+          </Link>
+        </nav>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-6 pb-20 pt-10">
+        <section className="grid items-center gap-12 lg:grid-cols-[0.92fr_1.08fr]">
+          <Motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.24 }}
+          >
+            <div className="mb-5 inline-flex items-center rounded-full border border-neutral-200 bg-white/80 px-3 py-1 text-xs text-neutral-500 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/80 dark:text-neutral-400">
+              Realtime workspace for focused teams
+            </div>
+            <h1 className="max-w-3xl text-5xl font-semibold tracking-tight text-neutral-950 dark:text-white sm:text-6xl">
+              Plan projects, move work, and keep your team in sync.
+            </h1>
+            <p className="mt-5 max-w-xl text-base leading-8 text-neutral-600 dark:text-neutral-400">
+              Hive combines Kanban boards, project chat, members, activity, and notifications in one clean collaborative workspace.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link to="/register" className="btn-primary px-5 py-2.5">
+                Start building your workspace
+              </Link>
+              <Link to="/login" className="btn-secondary px-5 py-2.5">
+                View your workspace
+              </Link>
+            </div>
+          </Motion.div>
+
+          <ProductPreview />
+        </section>
+
+        <section className="mt-20 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {features.map(([title, description]) => (
+            <div key={title} className="card p-5">
+              <div className="mb-4 h-1 w-10 rounded-full bg-neutral-900 dark:bg-white" />
+              <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+                {title}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-500 dark:text-neutral-400">
+                {description}
+              </p>
+            </div>
+          ))}
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function ProductPreview() {
+  const columns = [
+    ["Backlog", ["Design empty states", "Draft onboarding flow"]],
+    ["In Progress", ["Polish card metadata", "Add presence events"]],
+    ["Done", ["Ship activity feed", "Harden auth checks"]],
+  ];
+
+  return (
+    <Motion.div
+      initial={{ opacity: 0, y: 16, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.28, delay: 0.08 }}
+      className="relative"
+    >
+      <div className="card overflow-hidden shadow-notion-lg">
+        <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4 dark:border-neutral-800">
+          <div>
+            <p className="text-lg font-semibold">API Redesign</p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              4 members · 3 online · active now
+            </p>
+          </div>
+          <AvatarStack members={demoUsers} size="sm" />
+        </div>
+        <div className="grid gap-3 bg-neutral-50 p-4 dark:bg-neutral-950 sm:grid-cols-3">
+          {columns.map(([name, cards], index) => (
+            <div
+              key={name}
+              className="rounded-notion border border-neutral-200 border-t-2 border-t-neutral-300 bg-white p-3 dark:border-neutral-800 dark:border-t-neutral-700 dark:bg-neutral-900"
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-xs font-medium">{name}</span>
+                <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400">
+                  {cards.length}
+                </span>
+              </div>
+              <div className="space-y-2">
+                {cards.map((card, cardIndex) => (
+                  <div key={card} className="card p-3 text-left">
+                    <div className="mb-2 h-1 w-8 rounded-full bg-neutral-300 dark:bg-neutral-700" />
+                    <p className="text-xs font-medium">{card}</p>
+                    <p className="mt-1 text-[11px] text-neutral-400">
+                      {index === 2 ? "Completed" : cardIndex === 0 ? "Due soon" : "Assigned"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="grid border-t border-neutral-200 dark:border-neutral-800 sm:grid-cols-[1fr_220px]">
+          <div className="p-4 text-sm text-neutral-500 dark:text-neutral-400">
+            Aisha moved "Add presence events" to In Progress.
+          </div>
+          <div className="border-t border-neutral-200 p-4 text-sm dark:border-neutral-800 sm:border-l sm:border-t-0">
+            <p className="mb-2 text-xs font-medium text-neutral-400">Project chat</p>
+            <div className="rounded-notion bg-neutral-100 px-3 py-2 text-xs dark:bg-neutral-800">
+              Let us keep the board focused today.
+            </div>
+          </div>
+        </div>
+      </div>
+    </Motion.div>
+  );
+}

@@ -3,6 +3,7 @@ import { useKanbanStore } from "../../store/kanban.store.js";
 import { getSocket } from "../../socket/socket.js";
 import KanbanColumn from "./KanbanColumn.jsx";
 import AddColumnButton from "./AddColumnButton.jsx";
+import EmptyState from "../ui/EmptyState.jsx";
 
 export default function KanbanBoard({ projectId }) {
   const columns = useKanbanStore((s) => s.columns);
@@ -69,19 +70,43 @@ export default function KanbanBoard({ projectId }) {
             {...provided.droppableProps}
             className="flex gap-3 p-6 h-full overflow-x-auto items-start"
           >
-            {columns.map((column, index) => (
-              <KanbanColumn
-                key={column.id}
-                column={column}
-                index={index}
-                projectId={projectId}
-              />
-            ))}
-            {provided.placeholder}
-            <AddColumnButton projectId={projectId} />
+            {columns.length === 0 ? (
+              <div className="flex h-full min-w-full items-center justify-center">
+                <EmptyState
+                  icon={<BoardIcon />}
+                  title="This project is quiet right now"
+                  description="Create columns and start organizing the work."
+                  action={<AddColumnButton projectId={projectId} />}
+                />
+              </div>
+            ) : (
+              <>
+                {columns.map((column, index) => (
+                  <KanbanColumn
+                    key={column.id}
+                    column={column}
+                    index={index}
+                    projectId={projectId}
+                  />
+                ))}
+                {provided.placeholder}
+                <AddColumnButton projectId={projectId} />
+              </>
+            )}
           </div>
         )}
       </Droppable>
     </DragDropContext>
   );
 }
+
+const BoardIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path
+      d="M3 4h4v12H3V4zM8 4h4v12H8V4zM13 4h4v12h-4V4z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

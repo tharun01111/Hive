@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { MotionConfig } from "framer-motion";
 import { useAuthStore } from "./store/auth.store.js";
 import { getMeApi, refreshApi } from "./api/auth.api.js";
 import { initSocket } from "./socket/socket.js";
@@ -8,6 +9,7 @@ import LoginPage from "./pages/auth/LoginPage.jsx";
 import RegisterPage from "./pages/auth/RegisterPage.jsx";
 import WorkspacePage from "./pages/workspace/WorkspacePage.jsx";
 import ProjectPage from "./pages/project/ProjectPage.jsx";
+import LandingPage from "./pages/landing/LandingPage.jsx";
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -31,6 +33,15 @@ const PublicRoute = ({ children }) => {
   if (isLoading) return null;
 
   return !isAuthenticated ? children : <Navigate to="/" replace />;
+};
+
+const LandingGate = () => {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isLoading = useAuthStore((s) => s.isLoading);
+
+  if (isLoading) return null;
+
+  return isAuthenticated ? <Navigate to="/app" replace /> : <LandingPage />;
 };
 
 export default function App() {
@@ -72,48 +83,51 @@ export default function App() {
   }, [accessToken]);
 
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <LoginPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <PublicRoute>
-            <RegisterPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <WorkspacePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/workspace/:workspaceId"
-        element={
-          <ProtectedRoute>
-            <WorkspacePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/project/:projectId"
-        element={
-          <ProtectedRoute>
-            <ProjectPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <MotionConfig reducedMotion="user">
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <RegisterPage />
+            </PublicRoute>
+          }
+        />
+        <Route path="/" element={<LandingGate />} />
+        <Route
+          path="/app"
+          element={
+            <ProtectedRoute>
+              <WorkspacePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/workspace/:workspaceId"
+          element={
+            <ProtectedRoute>
+              <WorkspacePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/project/:projectId"
+          element={
+            <ProtectedRoute>
+              <ProjectPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </MotionConfig>
   );
 }

@@ -3,6 +3,7 @@ import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { useKanbanStore } from "../../store/kanban.store.js";
 import { getSocket } from "../../socket/socket.js";
 import KanbanCard from "./KanbanCard.jsx";
+import EmptyState from "../ui/EmptyState.jsx";
 
 export default function KanbanColumn({ column, index, projectId }) {
   const removeColumn = useKanbanStore((s) => s.removeColumn);
@@ -53,7 +54,7 @@ export default function KanbanColumn({ column, index, projectId }) {
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`w-72 shrink-0 flex flex-col rounded-notion bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 max-h-full ${
+          className={`w-72 shrink-0 flex flex-col rounded-notion bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 border-t-2 border-t-neutral-300 dark:border-t-neutral-700 max-h-full ${
             snapshot.isDragging ? "shadow-notion-lg rotate-1" : ""
           }`}
         >
@@ -78,7 +79,7 @@ export default function KanbanColumn({ column, index, projectId }) {
                 className="flex-1 text-left text-sm font-medium text-neutral-900 dark:text-neutral-100"
               >
                 {column.name}
-                <span className="ml-2 text-xs text-neutral-400 dark:text-neutral-600 font-normal">
+                <span className="ml-2 rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400 font-normal">
                   {column.cards?.length ?? 0}
                 </span>
               </button>
@@ -123,6 +124,24 @@ export default function KanbanColumn({ column, index, projectId }) {
                   />
                 ))}
                 {provided.placeholder}
+                {column.cards?.length === 0 && !addingCard && (
+                  <div className="rounded-notion border border-dashed border-neutral-200 bg-white/60 dark:border-neutral-800 dark:bg-neutral-950/30">
+                    <EmptyState
+                      compact
+                      icon={<EmptyColumnIcon />}
+                      title="No tasks here yet"
+                      description="Add a card or drag work into this stage."
+                      action={
+                        <button
+                          onClick={() => setAddingCard(true)}
+                          className="btn-secondary py-1.5 px-3 text-xs"
+                        >
+                          Add task
+                        </button>
+                      }
+                    />
+                  </div>
+                )}
 
                 {/* Add card inline form */}
                 {addingCard && (
@@ -193,6 +212,17 @@ const TrashIcon = () => (
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const EmptyColumnIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <path
+      d="M4 5h10M4 9h7M4 13h5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
     />
   </svg>
 );

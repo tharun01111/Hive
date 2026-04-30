@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fallow-cli/fallow-node": "^2.56.0",
     "@hello-pangea/dnd": "^17.0.0",
     "axios": "^1.6.7",
     "dotenv": "^17.4.2",
+    "framer-motion": "^12.38.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.4.1",

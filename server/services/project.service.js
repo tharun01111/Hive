@@ -24,6 +24,14 @@ export const createProject = async ({
       members: {
         create: { userId, role: "ADMIN" },
       },
+      columns: {
+        create: [
+          { name: "Backlog", order: 0 },
+          { name: "In Progress", order: 1 },
+          { name: "Review", order: 2 },
+          { name: "Done", order: 3 },
+        ],
+      },
     },
     include: projectWithMembers,
   });

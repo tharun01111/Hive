@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { useProject } from "../../hooks/useProject.js";
 import { useSocketEvents } from "../../socket/useSocketEvents.js";
 import AppLayout from "../../components/layout/AppLayout.jsx";
@@ -7,41 +8,43 @@ import KanbanBoard from "../../components/kanban/KanbanBoard.jsx";
 import ChatPanel from "../../components/chat/ChatPanel.jsx";
 import ProjectMembersModal from "../../components/members/ProjectMembersModal.jsx";
 import { useProjectStore } from "../../store/project.store.js";
+import { usePresenceStore } from "../../store/presence.store.js";
+import { AvatarStack } from "../../components/ui/Avatar.jsx";
+import { BoardSkeleton } from "../../components/ui/Skeleton.jsx";
 
 export default function ProjectPage() {
   const { projectId } = useParams();
   const { loading } = useProject(projectId);
   const activeProject = useProjectStore((s) => s.activeProject);
+  const onlineUsers = usePresenceStore((s) => s.projectUsers);
   const [chatOpen, setChatOpen] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
 
   useSocketEvents(projectId);
-
-  if (loading) {
-    return (
-      <AppLayout>
-        <div className="h-full flex items-center justify-center">
-          <div className="w-5 h-5 border-2 border-neutral-300 border-t-neutral-900 dark:border-neutral-700 dark:border-t-neutral-100 rounded-full animate-spin" />
-        </div>
-      </AppLayout>
-    );
-  }
 
   return (
     <AppLayout>
       <div className="flex h-full">
         <div className="flex-1 flex flex-col min-w-0">
           {/* Project header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
             <div>
-              <h1 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
-                {activeProject?.name}
+              <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                {activeProject?.name ?? "Loading project"}
               </h1>
               {activeProject?.description && (
-                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
                   {activeProject.description}
                 </p>
               )}
+              <div className="mt-3 flex items-center gap-3 text-xs text-neutral-400 dark:text-neutral-600">
+                <span>{activeProject?.members?.length ?? 0} members</span>
+                <span className="h-1 w-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />
+                <span>{onlineUsers.length} online</span>
+                {onlineUsers.length > 0 && (
+                  <AvatarStack members={onlineUsers} limit={4} size="sm" />
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -67,14 +70,19 @@ export default function ProjectPage() {
 
           {/* Kanban board */}
           <div className="flex-1 overflow-hidden">
-            <KanbanBoard projectId={projectId} />
+            {loading ? <BoardSkeleton /> : <KanbanBoard projectId={projectId} />}
           </div>
         </div>
 
         {/* Chat panel */}
-        {chatOpen && (
-          <ChatPanel projectId={projectId} onClose={() => setChatOpen(false)} />
-        )}
+        <AnimatePresence>
+          {chatOpen && (
+            <ChatPanel
+              projectId={projectId}
+              onClose={() => setChatOpen(false)}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
       <ProjectMembersModal

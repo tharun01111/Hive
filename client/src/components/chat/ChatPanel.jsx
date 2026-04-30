@@ -1,12 +1,19 @@
 import { useState, useEffect, useRef } from "react";
+import { motion as Motion } from "framer-motion";
 import { useAuthStore } from "../../store/auth.store.js";
 import { useMessages } from "../../hooks/useMessages.js";
 import { useChatStore } from "../../store/chat.store.js";
+import { useProjectStore } from "../../store/project.store.js";
 import { getSocket } from "../../socket/socket.js";
+import ChatHeader from "./ChatHeader.jsx";
+import MessageList from "./MessageList.jsx";
+import TypingIndicator from "./TypingIndicator.jsx";
+import ChatComposer from "./ChatComposer.jsx";
 
 export default function ChatPanel({ projectId, onClose }) {
   const user = useAuthStore((s) => s.user);
-  const { messages, nextCursor, loadingMore, loadMore } =
+  const activeProject = useProjectStore((s) => s.activeProject);
+  const { messages, nextCursor, loading, loadingMore, loadMore } =
     useMessages(projectId);
   const typingUsers = useChatStore((s) => s.typingUsers);
   const [content, setContent] = useState("");
@@ -37,132 +44,25 @@ export default function ChatPanel({ projectId, onClose }) {
   };
 
   return (
-    <div className="w-80 shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
-        <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-          Chat
-        </p>
-        <button
-          onClick={onClose}
-          className="p-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400"
-        >
-          <CloseIcon />
-        </button>
-      </div>
-
-      {/* Load more */}
-      {nextCursor && (
-        <div className="px-4 pt-2">
-          <button
-            onClick={loadMore}
-            disabled={loadingMore}
-            className="w-full text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 py-1"
-          >
-            {loadingMore ? "Loading..." : "Load older messages"}
-          </button>
-        </div>
-      )}
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-sm text-neutral-400 dark:text-neutral-600">
-              No messages yet. Say hello!
-            </p>
-          </div>
-        )}
-        {messages.map((msg) => {
-          const isMe = msg.userId === user?.id;
-          return (
-            <div
-              key={msg.id}
-              className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
-            >
-              {!isMe && (
-                <span className="text-xs text-neutral-400 dark:text-neutral-600 mb-1 px-1">
-                  {msg.user?.name}
-                </span>
-              )}
-              <div
-                className={`max-w-[85%] px-3 py-2 rounded-notion text-sm ${
-                  isMe
-                    ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900"
-                    : "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
-                }`}
-              >
-                {msg.content}
-              </div>
-              <span className="text-xs text-neutral-300 dark:text-neutral-700 mt-0.5 px-1">
-                {new Date(msg.createdAt).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
-            </div>
-          );
-        })}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Typing indicator */}
-      {typingUsers.length > 0 && (
-        <div className="px-4 py-1">
-          <p className="text-xs text-neutral-400 dark:text-neutral-600 italic">
-            {typingUsers.map((u) => u.userName).join(", ")}{" "}
-            {typingUsers.length === 1 ? "is" : "are"} typing...
-          </p>
-        </div>
-      )}
-
-      {/* Input */}
-      <div className="px-4 py-3 border-t border-neutral-200 dark:border-neutral-800 shrink-0">
-        <form onSubmit={handleSend} className="flex items-end gap-2">
-          <textarea
-            value={content}
-            onChange={handleTyping}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSend(e);
-              }
-            }}
-            placeholder="Message..."
-            rows={1}
-            className="input text-sm resize-none flex-1"
-          />
-          <button
-            type="submit"
-            disabled={!content.trim()}
-            className="btn-primary px-3 py-2 shrink-0"
-          >
-            <SendIcon />
-          </button>
-        </form>
-      </div>
-    </div>
+    <Motion.aside
+      initial={{ opacity: 0, x: 18 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 18 }}
+      transition={{ duration: 0.18 }}
+      className="w-80 shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col h-full bg-white dark:bg-neutral-950"
+    >
+      <ChatHeader projectName={activeProject?.name} onClose={onClose} />
+      <MessageList
+        messages={messages}
+        user={user}
+        loading={loading}
+        nextCursor={nextCursor}
+        loadingMore={loadingMore}
+        loadMore={loadMore}
+        messagesEndRef={messagesEndRef}
+      />
+      <TypingIndicator users={typingUsers} />
+      <ChatComposer content={content} onChange={handleTyping} onSend={handleSend} />
+    </Motion.aside>
   );
 }
-
-const CloseIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path
-      d="M2 2l10 10M12 2L2 12"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
-const SendIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path
-      d="M12 2L2 7l4 2 1 4 5-11z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
