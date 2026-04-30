@@ -1,29 +1,29 @@
-import { useEffect, useState } from 'react'
-import { useProjectStore } from '../store/project.store.js'
-import { getProjectsApi } from '../api/project.api.js'
+import { useEffect, useState } from "react";
+import { useProjectStore } from "../store/project.store.js";
+import { getProjectsApi } from "../api/project.api.js";
 
 export const useProjects = (workspaceId) => {
-  const { projects, setProjects } = useProjectStore()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const { projects, setProjects } = useProjectStore();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!workspaceId) return
+    if (!workspaceId) return;
     const load = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
-        const { data } = await getProjectsApi(workspaceId)
-        setProjects(data.projects)
+        const { data } = await getProjectsApi(workspaceId);
+        setProjects(data.projects);
       } catch (err) {
-        setError(err)
-        console.error('Failed to load projects', err)
+        setError(err);
+        console.error("Failed to load projects", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    load()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspaceId])
+    };
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceId]);
 
-  return { projects, loading, error }
-}
+  return { projects, loading, error };
+};

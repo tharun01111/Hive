@@ -1,66 +1,68 @@
-import { DragDropContext, Droppable } from '@hello-pangea/dnd'
-import { useKanbanStore } from '../../store/kanban.store.js'
-import { getSocket } from '../../socket/socket.js'
-import KanbanColumn from './KanbanColumn.jsx'
-import AddColumnButton from './AddColumnButton.jsx'
+import { DragDropContext, Droppable } from "@hello-pangea/dnd";
+import { useKanbanStore } from "../../store/kanban.store.js";
+import { getSocket } from "../../socket/socket.js";
+import KanbanColumn from "./KanbanColumn.jsx";
+import AddColumnButton from "./AddColumnButton.jsx";
 
 export default function KanbanBoard({ projectId }) {
-  const columns = useKanbanStore((s) => s.columns)
-  const moveCard = useKanbanStore((s) => s.moveCard)
-  const reorderColumns = useKanbanStore((s) => s.reorderColumns)
+  const columns = useKanbanStore((s) => s.columns);
+  const moveCard = useKanbanStore((s) => s.moveCard);
+  const reorderColumns = useKanbanStore((s) => s.reorderColumns);
 
   const handleDragEnd = (result) => {
-    const { destination, source, type } = result
+    const { destination, source, type } = result;
 
-    if (!destination) return
+    if (!destination) return;
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
-    ) return
+    )
+      return;
 
-    const socket = getSocket()
+    const socket = getSocket();
 
-    if (type === 'COLUMN') {
-      const reordered = Array.from(columns)
-      const [removed] = reordered.splice(source.index, 1)
-      reordered.splice(destination.index, 0, removed)
+    if (type === "COLUMN") {
+      const reordered = Array.from(columns);
+      const [removed] = reordered.splice(source.index, 1);
+      reordered.splice(destination.index, 0, removed);
 
-      const updated = reordered.map((col, idx) => ({ ...col, order: idx }))
-      reorderColumns(updated)
+      const updated = reordered.map((col, idx) => ({ ...col, order: idx }));
+      reorderColumns(updated);
 
-      socket?.emit('columns:reorder', {
+      socket?.emit("columns:reorder", {
         columns: updated.map((c) => ({ id: c.id, order: c.order })),
         projectId,
-      })
-      return
+      });
+      return;
     }
 
     // Card drag
-    const sourceColumn = columns.find((c) => c.id === source.droppableId)
-    const destColumn = columns.find((c) => c.id === destination.droppableId)
+    const sourceColumn = columns.find((c) => c.id === source.droppableId);
+    const destColumn = columns.find((c) => c.id === destination.droppableId);
 
-    if (!sourceColumn || !destColumn) return
+    if (!sourceColumn || !destColumn) return;
 
-    const cardId = sourceColumn.cards[source.index]?.id
-    if (!cardId) return
+    const cardId = sourceColumn.cards[source.index]?.id;
+    if (!cardId) return;
 
-    moveCard(cardId, source.droppableId, destination.droppableId, destination.index)
+    moveCard(
+      cardId,
+      source.droppableId,
+      destination.droppableId,
+      destination.index,
+    );
 
-    socket?.emit('card:move', {
+    socket?.emit("card:move", {
       cardId,
       columnId: destination.droppableId,
       order: destination.index,
       projectId,
-    })
-  }
+    });
+  };
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable
-        droppableId="board"
-        type="COLUMN"
-        direction="horizontal"
-      >
+      <Droppable droppableId="board" type="COLUMN" direction="horizontal">
         {(provided) => (
           <div
             ref={provided.innerRef}
@@ -81,5 +83,5 @@ export default function KanbanBoard({ projectId }) {
         )}
       </Droppable>
     </DragDropContext>
-  )
+  );
 }

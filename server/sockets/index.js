@@ -4,6 +4,21 @@ import Redis from "ioredis";
 import { verifyAccessToken } from "../utils/tokens.js";
 import { registerKanbanHandlers } from "./kanban.handlers.js";
 import { registerChatHandlers } from "./chat.handlers.js";
+import prisma from "../lib/prisma.js";
+
+const isProjectMember = async (projectId, userId) => {
+  const member = await prisma.projectMember.findUnique({
+    where: { projectId_userId: { projectId, userId } },
+  });
+  return Boolean(member);
+};
+
+const isWorkspaceMember = async (workspaceId, userId) => {
+  const member = await prisma.workspaceMember.findUnique({
+    where: { workspaceId_userId: { workspaceId, userId } },
+  });
+  return Boolean(member);
+};
 
 export const initSocket = async (httpServer) => {
   const io = new Server(httpServer, {
@@ -38,7 +53,11 @@ export const initSocket = async (httpServer) => {
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id} (user: ${socket.userId})`);
 
-    socket.on("join:project", (projectId) => {
+    socket.on("join:project", async (projectId) => {
+      if (!(await isProjectMember(projectId, socket.userId))) {
+        socket.emit("error", { message: "Not authorized for this project" });
+        return;
+      }
       socket.join(`project:${projectId}`);
       console.log(`User ${socket.userId} joined project:${projectId}`);
     });
@@ -47,7 +66,11 @@ export const initSocket = async (httpServer) => {
       socket.leave(`project:${projectId}`);
     });
 
-    socket.on("join:workspace", (workspaceId) => {
+    socket.on("join:workspace", async (workspaceId) => {
+      if (!(await isWorkspaceMember(workspaceId, socket.userId))) {
+        socket.emit("error", { message: "Not authorized for this workspace" });
+        return;
+      }
       socket.join(`workspace:${workspaceId}`);
       console.log(`User ${socket.userId} joined workspace:${workspaceId}`);
     });

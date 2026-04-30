@@ -1,67 +1,120 @@
-import { useState } from 'react'
-import { useKanbanStore } from '../../store/kanban.store.js'
-import { useProjectStore } from '../../store/project.store.js'
-import { getSocket } from '../../socket/socket.js'
-import Modal from '../ui/Modal.jsx'
+import { useEffect, useState } from "react";
+import { useKanbanStore } from "../../store/kanban.store.js";
+import { useProjectStore } from "../../store/project.store.js";
+import { getSocket } from "../../socket/socket.js";
+import Modal from "../ui/Modal.jsx";
 
 export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
-  const removeCard = useKanbanStore((s) => s.removeCard)
-  const updateCard = useKanbanStore((s) => s.updateCard)
-  const activeProject = useProjectStore((s) => s.activeProject)
-  const socket = getSocket()
+  const removeCard = useKanbanStore((s) => s.removeCard);
+  const updateCard = useKanbanStore((s) => s.updateCard);
+  const activeProject = useProjectStore((s) => s.activeProject);
+  const socket = getSocket();
 
-  const [editing, setEditing] = useState(false)
+  const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     title: card.title,
-    description: card.description ?? '',
+    description: card.description ?? "",
     dueDate: card.dueDate
-      ? new Date(card.dueDate).toISOString().split('T')[0]
-      : '',
-  })
+      ? new Date(card.dueDate).toISOString().split("T")[0]
+      : "",
+  });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setForm({
+      title: card.title,
+      description: card.description ?? "",
+      dueDate: card.dueDate
+        ? new Date(card.dueDate).toISOString().split("T")[0]
+        : "",
+    });
+    setEditing(false);
+    setError("");
+  }, [card]);
 
   const handleSave = () => {
-    if (!form.title.trim()) return
+    if (!form.title.trim()) return;
+    if (!socket) {
+      setError("Realtime connection is not available");
+      return;
+    }
 
-    socket?.emit('card:update', {
+    const cleanup = () => {
+      socket.off("card:update:ack", handleAck);
+      socket.off("card:update:error", handleError);
+    };
+
+    const handleAck = ({ card: updatedCard }) => {
+      if (updatedCard.id !== card.id) return;
+      cleanup();
+      updateCard(updatedCard);
+      setEditing(false);
+      setError("");
+    };
+
+    const handleError = ({ cardId, message }) => {
+      if (cardId !== card.id) return;
+      cleanup();
+      setError(message ?? "Failed to update card");
+    };
+
+    socket.on("card:update:ack", handleAck);
+    socket.on("card:update:error", handleError);
+
+    socket.emit("card:update", {
       cardId: card.id,
       title: form.title.trim(),
       description: form.description.trim(),
       dueDate: form.dueDate || null,
       projectId,
-    })
-
-    updateCard({
-      ...card,
-      title: form.title.trim(),
-      description: form.description.trim(),
-      dueDate: form.dueDate || null,
-    })
-
-    setEditing(false)
-  }
+    });
+  };
 
   const handleDelete = () => {
-    if (!window.confirm('Delete this card?')) return
-    socket?.emit('card:delete', { cardId: card.id, projectId })
-    removeCard(card.id)
-    onClose()
-  }
+    if (!window.confirm("Delete this card?")) return;
+    if (!socket) {
+      setError("Realtime connection is not available");
+      return;
+    }
+
+    const cleanup = () => {
+      socket.off("card:delete:ack", handleAck);
+      socket.off("card:delete:error", handleError);
+    };
+
+    const handleAck = ({ cardId }) => {
+      if (cardId !== card.id) return;
+      cleanup();
+      removeCard(card.id);
+      setError("");
+      onClose();
+    };
+
+    const handleError = ({ cardId, message }) => {
+      if (cardId !== card.id) return;
+      cleanup();
+      setError(message ?? "Failed to delete card");
+    };
+
+    socket.on("card:delete:ack", handleAck);
+    socket.on("card:delete:error", handleError);
+    socket.emit("card:delete", { cardId: card.id, projectId });
+  };
 
   const handleAssign = (userId) => {
-    socket?.emit('card:assign', { cardId: card.id, userId, projectId })
-  }
+    socket?.emit("card:assign", { cardId: card.id, userId, projectId });
+  };
 
   const handleUnassign = (userId) => {
-    socket?.emit('card:unassign', { cardId: card.id, userId, projectId })
-  }
+    socket?.emit("card:unassign", { cardId: card.id, userId, projectId });
+  };
 
   const isAssigned = (userId) =>
-    card.assignees?.some((a) => a.userId === userId)
+    card.assignees?.some((a) => a.userId === userId);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Card details" size="lg">
       <div className="space-y-4">
-
         {/* Title */}
         {editing ? (
           <input
@@ -88,7 +141,9 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
           {editing ? (
             <textarea
               value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
               rows={3}
               placeholder="Add a description..."
               className="input text-sm resize-none"
@@ -121,10 +176,13 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
             />
           ) : (
             <p className="text-sm text-neutral-600 dark:text-neutral-400">
-              {card.dueDate
-                ? new Date(card.dueDate).toLocaleDateString()
-                : <span className="text-neutral-300 dark:text-neutral-600 italic">No due date</span>
-              }
+              {card.dueDate ? (
+                new Date(card.dueDate).toLocaleDateString()
+              ) : (
+                <span className="text-neutral-300 dark:text-neutral-600 italic">
+                  No due date
+                </span>
+              )}
             </p>
           )}
         </div>
@@ -136,18 +194,19 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
           </label>
           <div className="flex flex-wrap gap-2">
             {activeProject?.members?.map((member) => {
-              const assigned = isAssigned(member.userId)
+              const assigned = isAssigned(member.userId);
               return (
                 <button
                   key={member.id}
-                  onClick={() => assigned
-                    ? handleUnassign(member.userId)
-                    : handleAssign(member.userId)
+                  onClick={() =>
+                    assigned
+                      ? handleUnassign(member.userId)
+                      : handleAssign(member.userId)
                   }
                   className={`flex items-center gap-1.5 px-2 py-1 rounded-notion text-xs transition-colors ${
                     assigned
-                      ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
-                      : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                      ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900"
+                      : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
                   }`}
                 >
                   <div className="w-4 h-4 rounded-full bg-neutral-400 dark:bg-neutral-600 flex items-center justify-center">
@@ -158,17 +217,20 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
                   {member.user.name}
                   {assigned && <CheckIcon />}
                 </button>
-              )
+              );
             })}
           </div>
         </div>
 
         {/* Actions */}
+        {error && (
+          <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-notion">
+            {error}
+          </p>
+        )}
+
         <div className="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-neutral-800">
-          <button
-            onClick={handleDelete}
-            className="btn-danger text-xs py-1.5"
-          >
+          <button onClick={handleDelete} className="btn-danger text-xs py-1.5">
             Delete card
           </button>
           <div className="flex items-center gap-2">
@@ -199,11 +261,17 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
         </div>
       </div>
     </Modal>
-  )
+  );
 }
 
 const CheckIcon = () => (
   <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-    <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path
+      d="M2 6l3 3 5-5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
-)
+);

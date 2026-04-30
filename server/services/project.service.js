@@ -1,4 +1,4 @@
-import prisma from '../lib/prisma.js'
+import prisma from "../lib/prisma.js";
 
 const projectWithMembers = {
   members: {
@@ -8,21 +8,26 @@ const projectWithMembers = {
       },
     },
   },
-}
+};
 
-export const createProject = async ({ name, description, workspaceId, userId }) => {
+export const createProject = async ({
+  name,
+  description,
+  workspaceId,
+  userId,
+}) => {
   return prisma.project.create({
     data: {
       name: name.trim(),
       description: description?.trim(),
       workspaceId,
       members: {
-        create: { userId, role: 'ADMIN' },
+        create: { userId, role: "ADMIN" },
       },
     },
     include: projectWithMembers,
-  })
-}
+  });
+};
 
 export const getWorkspaceProjects = async (workspaceId) => {
   return prisma.project.findMany({
@@ -31,22 +36,22 @@ export const getWorkspaceProjects = async (workspaceId) => {
       ...projectWithMembers,
       _count: true,
     },
-    orderBy: { createdAt: 'desc' },
-  })
-}
+    orderBy: { createdAt: "desc" },
+  });
+};
 
 export const getProjectById = async (projectId) => {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: projectWithMembers,
-  })
+  });
 
   if (!project) {
-    throw { status: 404, message: 'Project not found' }
+    throw { status: 404, message: "Project not found" };
   }
 
-  return project
-}
+  return project;
+};
 
 export const updateProject = async (projectId, { name, description }) => {
   return prisma.project.update({
@@ -55,31 +60,31 @@ export const updateProject = async (projectId, { name, description }) => {
       name: name.trim(),
       description: description?.trim(),
     },
-  })
-}
+  });
+};
 
 export const deleteProject = async (projectId) => {
-  return prisma.project.delete({ where: { id: projectId } })
-}
+  return prisma.project.delete({ where: { id: projectId } });
+};
 
 export const inviteProjectMember = async (projectId, { email, role }) => {
   const user = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
-  })
+  });
 
   if (!user) {
-    throw { status: 404, message: 'User not found' }
+    throw { status: 404, message: "User not found" };
   }
 
   const existing = await prisma.projectMember.findUnique({
     where: { projectId_userId: { projectId, userId: user.id } },
-  })
+  });
 
   if (existing) {
-    throw { status: 409, message: 'User is already a member' }
+    throw { status: 409, message: "User is already a member" };
   }
 
-  const assignedRole = role === 'ADMIN' ? 'ADMIN' : 'MEMBER'
+  const assignedRole = role === "ADMIN" ? "ADMIN" : "MEMBER";
 
   return prisma.projectMember.create({
     data: { projectId, userId: user.id, role: assignedRole },
@@ -88,5 +93,5 @@ export const inviteProjectMember = async (projectId, { email, role }) => {
         select: { id: true, name: true, email: true, avatarUrl: true },
       },
     },
-  })
-}
+  });
+};

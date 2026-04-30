@@ -2,9 +2,9 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '/api',
+  baseURL: import.meta.env.VITE_API_URL ?? "/api",
   withCredentials: true,
-})
+});
 
 let accessToken = null;
 
@@ -57,11 +57,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await axios.post(
-          "/api/auth/refresh",
-          {},
-          { withCredentials: true },
-        );
+        const { data } = await api.post("/auth/refresh", {});
         const newToken = data.accessToken;
         setApiToken(newToken);
         const { useAuthStore } = await import("../store/auth.store.js");

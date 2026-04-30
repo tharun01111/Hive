@@ -1,23 +1,23 @@
-import { useState } from 'react'
-import { getSocket } from '../../socket/socket.js'
+import { useState } from "react";
+import { getSocket } from "../../socket/socket.js";
 
 export default function AddColumnButton({ projectId }) {
-  const [adding, setAdding] = useState(false)
-  const [name, setName] = useState('')
-  const socket = getSocket()
+  const [adding, setAdding] = useState(false);
+  const [name, setName] = useState("");
+  const socket = getSocket();
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    if (!name.trim()) return
+    e.preventDefault();
+    if (!name.trim()) return;
 
-    socket?.emit('column:create', {
+    socket?.emit("column:create", {
       name: name.trim(),
       projectId,
-    })
+    });
 
-    setName('')
-    setAdding(false)
-  }
+    setName("");
+    setAdding(false);
+  };
 
   if (adding) {
     return (
@@ -28,9 +28,9 @@ export default function AddColumnButton({ projectId }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === 'Escape') {
-                setAdding(false)
-                setName('')
+              if (e.key === "Escape") {
+                setAdding(false);
+                setName("");
               }
             }}
             placeholder="Column name..."
@@ -42,7 +42,10 @@ export default function AddColumnButton({ projectId }) {
             </button>
             <button
               type="button"
-              onClick={() => { setAdding(false); setName('') }}
+              onClick={() => {
+                setAdding(false);
+                setName("");
+              }}
               className="btn-ghost py-1 px-2 text-xs"
             >
               Cancel
@@ -50,7 +53,7 @@ export default function AddColumnButton({ projectId }) {
           </div>
         </form>
       </div>
-    )
+    );
   }
 
   return (
@@ -61,11 +64,16 @@ export default function AddColumnButton({ projectId }) {
       <PlusIcon />
       Add column
     </button>
-  )
+  );
 }
 
 const PlusIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path
+      d="M7 2v10M2 7h10"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
   </svg>
-)
+);

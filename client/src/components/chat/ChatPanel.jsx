@@ -1,43 +1,43 @@
-import { useState, useEffect, useRef } from 'react'
-import { useAuthStore } from '../../store/auth.store.js'
-import { useMessages } from '../../hooks/useMessages.js'
-import { useChatStore } from '../../store/chat.store.js'
-import { getSocket } from '../../socket/socket.js'
+import { useState, useEffect, useRef } from "react";
+import { useAuthStore } from "../../store/auth.store.js";
+import { useMessages } from "../../hooks/useMessages.js";
+import { useChatStore } from "../../store/chat.store.js";
+import { getSocket } from "../../socket/socket.js";
 
 export default function ChatPanel({ projectId, onClose }) {
-  const user = useAuthStore((s) => s.user)
-  const { messages, nextCursor, loadingMore, loadMore } = useMessages(projectId)
-  const typingUsers = useChatStore((s) => s.typingUsers)
-  const [content, setContent] = useState('')
-  const messagesEndRef = useRef(null)
-  const typingTimeoutRef = useRef(null)
-  const socket = getSocket()
+  const user = useAuthStore((s) => s.user);
+  const { messages, nextCursor, loadingMore, loadMore } =
+    useMessages(projectId);
+  const typingUsers = useChatStore((s) => s.typingUsers);
+  const [content, setContent] = useState("");
+  const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const socket = getSocket();
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSend = (e) => {
-    e.preventDefault()
-    if (!content.trim()) return
-    socket?.emit('message:send', { projectId, content: content.trim() })
-    setContent('')
-    socket?.emit('typing:stop', { projectId })
-    clearTimeout(typingTimeoutRef.current)
-  }
+    e.preventDefault();
+    if (!content.trim()) return;
+    socket?.emit("message:send", { projectId, content: content.trim() });
+    setContent("");
+    socket?.emit("typing:stop", { projectId });
+    clearTimeout(typingTimeoutRef.current);
+  };
 
   const handleTyping = (e) => {
-    setContent(e.target.value)
-    socket?.emit('typing:start', { projectId, userName: user?.name })
-    clearTimeout(typingTimeoutRef.current)
+    setContent(e.target.value);
+    socket?.emit("typing:start", { projectId, userName: user?.name });
+    clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
-      socket?.emit('typing:stop', { projectId })
-    }, 2000)
-  }
+      socket?.emit("typing:stop", { projectId });
+    }, 2000);
+  };
 
   return (
     <div className="w-80 shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col h-full">
-
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
         <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
@@ -59,7 +59,7 @@ export default function ChatPanel({ projectId, onClose }) {
             disabled={loadingMore}
             className="w-full text-xs text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 py-1"
           >
-            {loadingMore ? 'Loading...' : 'Load older messages'}
+            {loadingMore ? "Loading..." : "Load older messages"}
           </button>
         </div>
       )}
@@ -74,11 +74,11 @@ export default function ChatPanel({ projectId, onClose }) {
           </div>
         )}
         {messages.map((msg) => {
-          const isMe = msg.userId === user?.id
+          const isMe = msg.userId === user?.id;
           return (
             <div
               key={msg.id}
-              className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+              className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
             >
               {!isMe && (
                 <span className="text-xs text-neutral-400 dark:text-neutral-600 mb-1 px-1">
@@ -88,20 +88,20 @@ export default function ChatPanel({ projectId, onClose }) {
               <div
                 className={`max-w-[85%] px-3 py-2 rounded-notion text-sm ${
                   isMe
-                    ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
-                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100'
+                    ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900"
+                    : "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 }`}
               >
                 {msg.content}
               </div>
               <span className="text-xs text-neutral-300 dark:text-neutral-700 mt-0.5 px-1">
                 {new Date(msg.createdAt).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
+                  hour: "2-digit",
+                  minute: "2-digit",
                 })}
               </span>
             </div>
-          )
+          );
         })}
         <div ref={messagesEndRef} />
       </div>
@@ -110,8 +110,8 @@ export default function ChatPanel({ projectId, onClose }) {
       {typingUsers.length > 0 && (
         <div className="px-4 py-1">
           <p className="text-xs text-neutral-400 dark:text-neutral-600 italic">
-            {typingUsers.map((u) => u.userName).join(', ')}{' '}
-            {typingUsers.length === 1 ? 'is' : 'are'} typing...
+            {typingUsers.map((u) => u.userName).join(", ")}{" "}
+            {typingUsers.length === 1 ? "is" : "are"} typing...
           </p>
         </div>
       )}
@@ -123,9 +123,9 @@ export default function ChatPanel({ projectId, onClose }) {
             value={content}
             onChange={handleTyping}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                handleSend(e)
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend(e);
               }
             }}
             placeholder="Message..."
@@ -142,17 +142,27 @@ export default function ChatPanel({ projectId, onClose }) {
         </form>
       </div>
     </div>
-  )
+  );
 }
 
 const CloseIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path
+      d="M2 2l10 10M12 2L2 12"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
   </svg>
-)
+);
 
 const SendIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M12 2L2 7l4 2 1 4 5-11z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    <path
+      d="M12 2L2 7l4 2 1 4 5-11z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
   </svg>
-)
+);

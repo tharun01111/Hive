@@ -1,4 +1,4 @@
-import prisma from '../lib/prisma.js'
+import prisma from "../lib/prisma.js";
 
 export const createWorkspace = async ({ name, description, userId }) => {
   return prisma.workspace.create({
@@ -6,7 +6,7 @@ export const createWorkspace = async ({ name, description, userId }) => {
       name: name.trim(),
       description: description?.trim(),
       members: {
-        create: { userId, role: 'ADMIN' },
+        create: { userId, role: "ADMIN" },
       },
     },
     include: {
@@ -18,8 +18,8 @@ export const createWorkspace = async ({ name, description, userId }) => {
         },
       },
     },
-  })
-}
+  });
+};
 
 export const getUserWorkspaces = async (userId) => {
   return prisma.workspace.findMany({
@@ -36,9 +36,9 @@ export const getUserWorkspaces = async (userId) => {
       },
       _count: { select: { projects: true } },
     },
-    orderBy: { createdAt: 'desc' },
-  })
-}
+    orderBy: { createdAt: "desc" },
+  });
+};
 
 export const getWorkspaceById = async (workspaceId) => {
   const workspace = await prisma.workspace.findUnique({
@@ -51,16 +51,16 @@ export const getWorkspaceById = async (workspaceId) => {
           },
         },
       },
-      projects: { orderBy: { createdAt: 'desc' } },
+      projects: { orderBy: { createdAt: "desc" } },
     },
-  })
+  });
 
   if (!workspace) {
-    throw { status: 404, message: 'Workspace not found' }
+    throw { status: 404, message: "Workspace not found" };
   }
 
-  return workspace
-}
+  return workspace;
+};
 
 export const updateWorkspace = async (workspaceId, { name, description }) => {
   return prisma.workspace.update({
@@ -69,31 +69,31 @@ export const updateWorkspace = async (workspaceId, { name, description }) => {
       name: name.trim(),
       description: description?.trim(),
     },
-  })
-}
+  });
+};
 
 export const deleteWorkspace = async (workspaceId) => {
-  return prisma.workspace.delete({ where: { id: workspaceId } })
-}
+  return prisma.workspace.delete({ where: { id: workspaceId } });
+};
 
 export const inviteWorkspaceMember = async (workspaceId, { email, role }) => {
   const user = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
-  })
+  });
 
   if (!user) {
-    throw { status: 404, message: 'User not found' }
+    throw { status: 404, message: "User not found" };
   }
 
   const existing = await prisma.workspaceMember.findUnique({
     where: { workspaceId_userId: { workspaceId, userId: user.id } },
-  })
+  });
 
   if (existing) {
-    throw { status: 409, message: 'User is already a member' }
+    throw { status: 409, message: "User is already a member" };
   }
 
-  const assignedRole = role === 'ADMIN' ? 'ADMIN' : 'MEMBER'
+  const assignedRole = role === "ADMIN" ? "ADMIN" : "MEMBER";
 
   return prisma.workspaceMember.create({
     data: { workspaceId, userId: user.id, role: assignedRole },
@@ -102,15 +102,19 @@ export const inviteWorkspaceMember = async (workspaceId, { email, role }) => {
         select: { id: true, name: true, email: true, avatarUrl: true },
       },
     },
-  })
-}
+  });
+};
 
-export const removeWorkspaceMember = async (workspaceId, userId, requestingUserId) => {
+export const removeWorkspaceMember = async (
+  workspaceId,
+  userId,
+  requestingUserId,
+) => {
   if (userId === requestingUserId) {
-    throw { status: 400, message: 'You cannot remove yourself' }
+    throw { status: 400, message: "You cannot remove yourself" };
   }
 
   return prisma.workspaceMember.delete({
     where: { workspaceId_userId: { workspaceId, userId } },
-  })
-}
+  });
+};

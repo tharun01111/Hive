@@ -1,50 +1,51 @@
-import { useState } from 'react'
-import { Draggable, Droppable } from '@hello-pangea/dnd'
-import { useKanbanStore } from '../../store/kanban.store.js'
-import { getSocket } from '../../socket/socket.js'
-import KanbanCard from './KanbanCard.jsx'
+import { useState } from "react";
+import { Draggable, Droppable } from "@hello-pangea/dnd";
+import { useKanbanStore } from "../../store/kanban.store.js";
+import { getSocket } from "../../socket/socket.js";
+import KanbanCard from "./KanbanCard.jsx";
 
 export default function KanbanColumn({ column, index, projectId }) {
-  const removeColumn = useKanbanStore((s) => s.removeColumn)
-  const [addingCard, setAddingCard] = useState(false)
-  const [cardTitle, setCardTitle] = useState('')
-  const [editingName, setEditingName] = useState(false)
-  const [columnName, setColumnName] = useState(column.name)
-  const socket = getSocket()
+  const removeColumn = useKanbanStore((s) => s.removeColumn);
+  const [addingCard, setAddingCard] = useState(false);
+  const [cardTitle, setCardTitle] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [columnName, setColumnName] = useState(column.name);
+  const socket = getSocket();
 
   const handleAddCard = (e) => {
-    e.preventDefault()
-    if (!cardTitle.trim()) return
+    e.preventDefault();
+    if (!cardTitle.trim()) return;
 
-    socket?.emit('card:create', {
+    socket?.emit("card:create", {
       columnId: column.id,
       title: cardTitle.trim(),
       projectId,
-    })
+    });
 
-    setCardTitle('')
-    setAddingCard(false)
-  }
+    setCardTitle("");
+    setAddingCard(false);
+  };
 
   const handleDeleteColumn = () => {
-    if (!window.confirm(`Delete column "${column.name}" and all its cards?`)) return
-    socket?.emit('column:delete', { columnId: column.id, projectId })
-    removeColumn(column.id)
-  }
+    if (!window.confirm(`Delete column "${column.name}" and all its cards?`))
+      return;
+    socket?.emit("column:delete", { columnId: column.id, projectId });
+    removeColumn(column.id);
+  };
 
   const handleRenameColumn = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!columnName.trim() || columnName === column.name) {
-      setEditingName(false)
-      return
+      setEditingName(false);
+      return;
     }
-    socket?.emit('column:update', {
+    socket?.emit("column:update", {
       columnId: column.id,
       name: columnName.trim(),
       projectId,
-    })
-    setEditingName(false)
-  }
+    });
+    setEditingName(false);
+  };
 
   return (
     <Draggable draggableId={column.id} index={index}>
@@ -53,7 +54,7 @@ export default function KanbanColumn({ column, index, projectId }) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           className={`w-72 shrink-0 flex flex-col rounded-notion bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 max-h-full ${
-            snapshot.isDragging ? 'shadow-notion-lg rotate-1' : ''
+            snapshot.isDragging ? "shadow-notion-lg rotate-1" : ""
           }`}
         >
           {/* Column header */}
@@ -109,8 +110,8 @@ export default function KanbanColumn({ column, index, projectId }) {
                 {...provided.droppableProps}
                 className={`flex-1 overflow-y-auto p-2 space-y-2 min-h-16 transition-colors ${
                   snapshot.isDraggingOver
-                    ? 'bg-neutral-100 dark:bg-neutral-800/50'
-                    : ''
+                    ? "bg-neutral-100 dark:bg-neutral-800/50"
+                    : ""
                 }`}
               >
                 {column.cards?.map((card, cardIndex) => (
@@ -131,13 +132,13 @@ export default function KanbanColumn({ column, index, projectId }) {
                       value={cardTitle}
                       onChange={(e) => setCardTitle(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault()
-                          handleAddCard(e)
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleAddCard(e);
                         }
-                        if (e.key === 'Escape') {
-                          setAddingCard(false)
-                          setCardTitle('')
+                        if (e.key === "Escape") {
+                          setAddingCard(false);
+                          setCardTitle("");
                         }
                       }}
                       placeholder="Card title..."
@@ -145,12 +146,18 @@ export default function KanbanColumn({ column, index, projectId }) {
                       className="input text-sm resize-none"
                     />
                     <div className="flex items-center gap-2">
-                      <button type="submit" className="btn-primary py-1 px-3 text-xs">
+                      <button
+                        type="submit"
+                        className="btn-primary py-1 px-3 text-xs"
+                      >
                         Add
                       </button>
                       <button
                         type="button"
-                        onClick={() => { setAddingCard(false); setCardTitle('') }}
+                        onClick={() => {
+                          setAddingCard(false);
+                          setCardTitle("");
+                        }}
                         className="btn-ghost py-1 px-2 text-xs"
                       >
                         Cancel
@@ -164,17 +171,28 @@ export default function KanbanColumn({ column, index, projectId }) {
         </div>
       )}
     </Draggable>
-  )
+  );
 }
 
 const PlusIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path
+      d="M7 2v10M2 7h10"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
   </svg>
-)
+);
 
 const TrashIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M2 4h10M5 4V2.5h4V4M5.5 6.5v4M8.5 6.5v4M3 4l.5 7.5h7L11 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path
+      d="M2 4h10M5 4V2.5h4V4M5.5 6.5v4M8.5 6.5v4M3 4l.5 7.5h7L11 4"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
-)
+);

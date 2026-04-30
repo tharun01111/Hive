@@ -1,62 +1,73 @@
-import { useEffect, useState } from 'react'
-import { useWorkspaceStore } from '../store/workspace.store.js'
-import { getWorkspaceActivitiesApi } from '../api/activity.api.js'
-import { getSocket } from '../socket/socket.js'
+import { useEffect, useState } from "react";
+import { useWorkspaceStore } from "../store/workspace.store.js";
+import { getWorkspaceActivitiesApi } from "../api/activity.api.js";
+import { getSocket } from "../socket/socket.js";
 
 export const useActivityFeed = () => {
-  const activeWorkspace = useWorkspaceStore((s) => s.activeWorkspace)
-  const [activities, setActivities] = useState([])
-  const [nextCursor, setNextCursor] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
+  const activeWorkspace = useWorkspaceStore((s) => s.activeWorkspace);
+  const [activities, setActivities] = useState([]);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    if (!activeWorkspace?.id) return
+    const workspaceId = activeWorkspace?.id;
+    if (!workspaceId) {
+      setActivities([]);
+      setNextCursor(null);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
 
     const load = async () => {
       try {
-        const { data } = await getWorkspaceActivitiesApi(activeWorkspace.id)
-        setActivities(data.activities)
-        setNextCursor(data.nextCursor)
+        const { data } = await getWorkspaceActivitiesApi(workspaceId);
+        if (cancelled) return;
+        setActivities(data.activities);
+        setNextCursor(data.nextCursor);
       } catch (err) {
-        console.error('Failed to load activities', err)
+        if (!cancelled) console.error("Failed to load activities", err);
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false);
       }
-    }
+    };
 
-    load()
+    load();
 
-    // Join workspace room for real-time activity updates
-    const socket = getSocket()
-    socket?.emit('join:workspace', activeWorkspace.id)
+    const socket = getSocket();
+    const handleNewActivity = ({ activity }) => {
+      setActivities((prev) => [activity, ...prev]);
+    };
 
-    socket?.on('activity:new', ({ activity }) => {
-      setActivities((prev) => [activity, ...prev])
-    })
+    socket?.emit("join:workspace", workspaceId);
+    socket?.on("activity:new", handleNewActivity);
 
     return () => {
-      socket?.emit('leave:workspace', activeWorkspace.id)
-      socket?.off('activity:new')
-    }
-  }, [activeWorkspace?.id])
+      cancelled = true;
+      socket?.emit("leave:workspace", workspaceId);
+      socket?.off("activity:new", handleNewActivity);
+    };
+  }, [activeWorkspace?.id]);
 
   const loadMore = async () => {
-    if (!nextCursor || loadingMore) return
-    setLoadingMore(true)
+    if (!nextCursor || loadingMore) return;
+    setLoadingMore(true);
     try {
       const { data } = await getWorkspaceActivitiesApi(
         activeWorkspace.id,
-        nextCursor
-      )
-      setActivities((prev) => [...prev, ...data.activities])
-      setNextCursor(data.nextCursor)
+        nextCursor,
+      );
+      setActivities((prev) => [...prev, ...data.activities]);
+      setNextCursor(data.nextCursor);
     } catch (err) {
-      console.error('Failed to load more activities', err)
+      console.error("Failed to load more activities", err);
     } finally {
-      setLoadingMore(false)
+      setLoadingMore(false);
     }
-  }
+  };
 
-  return { activities, nextCursor, loading, loadingMore, loadMore }
-}
+  return { activities, nextCursor, loading, loadingMore, loadMore };
+};

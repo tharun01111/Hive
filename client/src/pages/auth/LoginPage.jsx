@@ -1,45 +1,46 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { loginApi } from '../../api/auth.api.js'
-import { useAuthStore } from '../../store/auth.store.js'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { loginApi } from "../../api/auth.api.js";
+import { useAuthStore } from "../../store/auth.store.js";
 
 export default function LoginPage() {
-  const navigate = useNavigate()
-  const setAuth = useAuthStore((s) => s.setAuth)
+  const navigate = useNavigate();
+  const setAuth = useAuthStore((s) => s.setAuth);
 
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-    setError('')
-  }
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError("");
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
-      const { data } = await loginApi(form)
-      setAuth(data.user, data.accessToken)
-      navigate('/')
+      const { data } = await loginApi(form);
+      setAuth(data.user, data.accessToken);
+      navigate("/");
     } catch (err) {
-      setError(err.response?.data?.error || 'Something went wrong')
+      setError(err.response?.data?.error || "Something went wrong");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 px-4">
       <div className="w-full max-w-sm">
-
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-10 h-10 bg-neutral-900 dark:bg-white rounded-notion mb-4">
-            <span className="text-white dark:text-neutral-900 font-semibold text-lg">H</span>
+            <span className="text-white dark:text-neutral-900 font-semibold text-lg">
+              H
+            </span>
           </div>
           <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">
             Welcome back
@@ -94,12 +95,12 @@ export default function LoginPage() {
             disabled={loading}
             className="btn-primary w-full mt-2"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
         <p className="text-center text-sm text-neutral-500 dark:text-neutral-400 mt-6">
-          Don't have an account?{' '}
+          Don't have an account?{" "}
           <Link
             to="/register"
             className="text-neutral-900 dark:text-neutral-100 font-medium hover:underline"
@@ -109,5 +110,5 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }

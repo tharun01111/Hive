@@ -1,7 +1,7 @@
-import { useAuthStore } from '../../store/auth.store.js'
+import { useAuthStore } from "../../store/auth.store.js";
 
 export default function MemberList({ members, onRemove, currentUserRole }) {
-  const user = useAuthStore((s) => s.user)
+  const user = useAuthStore((s) => s.user);
 
   return (
     <div className="space-y-2">
@@ -32,16 +32,17 @@ export default function MemberList({ members, onRemove, currentUserRole }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              member.role === 'ADMIN'
-                ? 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
-                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
-            }`}>
-              {member.role === 'ADMIN' ? 'Admin' : 'Member'}
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                member.role === "ADMIN"
+                  ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900"
+                  : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400"
+              }`}
+            >
+              {member.role === "ADMIN" ? "Admin" : "Member"}
             </span>
 
-            {currentUserRole === 'ADMIN' &&
-              member.user.id !== user?.id && (
+            {currentUserRole === "ADMIN" && member.user.id !== user?.id && (
               <button
                 onClick={() => onRemove(member.user.id)}
                 className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/30 text-neutral-400 hover:text-red-500 transition-colors"
@@ -54,11 +55,16 @@ export default function MemberList({ members, onRemove, currentUserRole }) {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 const RemoveIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path
+      d="M2 2l10 10M12 2L2 12"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
   </svg>
-)
+);
