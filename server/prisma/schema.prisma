@@ -33,6 +33,8 @@ model RefreshToken {
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([expiresAt])
   @@map("refresh_tokens")
 }
 
@@ -59,6 +61,7 @@ model WorkspaceMember {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, userId])
+  @@index([userId])
   @@map("workspace_members")
 }
 
@@ -74,6 +77,8 @@ model Project {
   columns     Column[]
   messages    Message[]
 
+  @@index([workspaceId])
+  @@index([createdAt])
   @@map("projects")
 }
 
@@ -87,6 +92,7 @@ model ProjectMember {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, userId])
+  @@index([userId])
   @@map("project_members")
 }
 
@@ -100,6 +106,7 @@ model Column {
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   cards     Card[]
 
+  @@index([projectId, order])
   @@map("columns")
 }
 
@@ -115,6 +122,8 @@ model Card {
   column      Column         @relation(fields: [columnId], references: [id], onDelete: Cascade)
   assignees   CardAssignee[]
 
+  @@index([columnId, order])
+  @@index([dueDate])
   @@map("cards")
 }
 
@@ -127,6 +136,7 @@ model CardAssignee {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([cardId, userId])
+  @@index([userId])
   @@map("card_assignees")
 }
 
@@ -148,6 +158,9 @@ model Activity {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([workspaceId, createdAt])
+  @@index([projectId, createdAt])
+  @@index([userId, createdAt])
   @@map("activities")
 }
 
@@ -161,6 +174,8 @@ model Notification {
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, read])
+  @@index([userId, createdAt])
   @@map("notifications")
 }
 
@@ -174,5 +189,7 @@ model Message {
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([projectId, createdAt])
+  @@index([userId, createdAt])
   @@map("messages")
 }

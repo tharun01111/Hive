@@ -1,4 +1,4 @@
-import ActivityFeed from './ActivityFeed.jsx'
+import ActivityFeed from "./ActivityFeed.jsx";
 
 export default function ActivityPanel({ onClose }) {
   return (
@@ -20,11 +20,16 @@ export default function ActivityPanel({ onClose }) {
         <ActivityFeed />
       </div>
     </div>
-  )
+  );
 }
 
 const CloseIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path
+      d="M2 2l10 10M12 2L2 12"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
   </svg>
-)
+);

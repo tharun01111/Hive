@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { Draggable } from '@hello-pangea/dnd'
-import CardDetailModal from './CardDetailModal.jsx'
+import { useState } from "react";
+import { Draggable } from "@hello-pangea/dnd";
+import CardDetailModal from "./CardDetailModal.jsx";
 
 export default function KanbanCard({ card, index, projectId }) {
-  const [showDetail, setShowDetail] = useState(false)
+  const [showDetail, setShowDetail] = useState(false);
 
   return (
     <>
@@ -15,7 +15,9 @@ export default function KanbanCard({ card, index, projectId }) {
             {...provided.dragHandleProps}
             onClick={() => setShowDetail(true)}
             className={`card p-3 cursor-pointer group transition-shadow ${
-              snapshot.isDragging ? 'shadow-notion-lg rotate-1' : 'hover:shadow-notion-md'
+              snapshot.isDragging
+                ? "shadow-notion-lg rotate-1"
+                : "hover:shadow-notion-md"
             }`}
           >
             <p className="text-sm text-neutral-900 dark:text-neutral-100 leading-snug">
@@ -31,11 +33,13 @@ export default function KanbanCard({ card, index, projectId }) {
             <div className="flex items-center justify-between mt-2">
               {/* Due date */}
               {card.dueDate && (
-                <span className={`text-xs px-1.5 py-0.5 rounded ${
-                  new Date(card.dueDate) < new Date()
-                    ? 'bg-red-50 dark:bg-red-950/30 text-red-500'
-                    : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'
-                }`}>
+                <span
+                  className={`text-xs px-1.5 py-0.5 rounded ${
+                    new Date(card.dueDate) < new Date()
+                      ? "bg-red-50 dark:bg-red-950/30 text-red-500"
+                      : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400"
+                  }`}
+                >
                   {new Date(card.dueDate).toLocaleDateString()}
                 </span>
               )}
@@ -68,5 +72,5 @@ export default function KanbanCard({ card, index, projectId }) {
         onClose={() => setShowDetail(false)}
       />
     </>
-  )
+  );
 }

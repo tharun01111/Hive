@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import workspaceRoutes from "./routes/workspace.routes.js";
 import projectRoutes from "./routes/project.routes.js";
+import workspaceProjectRoutes from "./routes/workspace-project.routes.js";
 import kanbanRoutes from "./routes/kanban.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
 import messageRoutes from "./routes/message.routes.js";
@@ -20,7 +21,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/workspaces", workspaceRoutes);
-app.use("/api/workspaces/:workspaceId/projects", projectRoutes);
+app.use("/api/workspaces/:workspaceId/projects", workspaceProjectRoutes);
 app.use("/api/projects/:projectId", kanbanRoutes);
 app.use("/api/projects/:projectId/messages", messageRoutes);
 app.use("/api/notifications", notificationRoutes);

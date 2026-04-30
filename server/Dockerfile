@@ -8,4 +8,4 @@ RUN npm install --production
 RUN ./node_modules/.bin/prisma generate
 COPY . .
 EXPOSE 3000
-CMD ["node", "start.js"]
+CMD ["npm", "start"]

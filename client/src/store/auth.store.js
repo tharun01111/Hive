@@ -1,5 +1,5 @@
-import { create } from 'zustand'
-import { setApiToken } from '../api/axios.js'
+import { create } from "zustand";
+import { setApiToken } from "../api/axios.js";
 
 export const useAuthStore = create((set) => ({
   user: null,
@@ -8,19 +8,24 @@ export const useAuthStore = create((set) => ({
   isLoading: true,
 
   setAuth: (user, accessToken) => {
-    setApiToken(accessToken)
-    set({ user, accessToken, isAuthenticated: true, isLoading: false })
+    setApiToken(accessToken);
+    set({ user, accessToken, isAuthenticated: true, isLoading: false });
   },
 
   setAccessToken: (accessToken) => {
-    setApiToken(accessToken)
-    set({ accessToken })
+    setApiToken(accessToken);
+    set({ accessToken });
   },
 
   logout: () => {
-    setApiToken(null)
-    set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false })
+    setApiToken(null);
+    set({
+      user: null,
+      accessToken: null,
+      isAuthenticated: false,
+      isLoading: false,
+    });
   },
 
   setLoading: (isLoading) => set({ isLoading }),
-}))
+}));

@@ -1,29 +1,32 @@
-import { useState } from 'react'
-import { useProjectStore } from '../../store/project.store.js'
-import { inviteProjectMemberApi } from '../../api/project.api.js'
-import Modal from '../ui/Modal.jsx'
-import MemberList from './MemberList.jsx'
-import InviteMemberModal from './InviteMemberModal.jsx'
-import { useAuthStore } from '../../store/auth.store.js'
+import { useState } from "react";
+import { useProjectStore } from "../../store/project.store.js";
+import { inviteProjectMemberApi } from "../../api/project.api.js";
+import Modal from "../ui/Modal.jsx";
+import MemberList from "./MemberList.jsx";
+import InviteMemberModal from "./InviteMemberModal.jsx";
+import { useAuthStore } from "../../store/auth.store.js";
 
 export default function ProjectMembersModal({ isOpen, onClose }) {
-  const activeProject = useProjectStore((s) => s.activeProject)
-  const updateProject = useProjectStore((s) => s.updateProject)
-  const user = useAuthStore((s) => s.user)
-  const [showInvite, setShowInvite] = useState(false)
+  const activeProject = useProjectStore((s) => s.activeProject);
+  const updateProject = useProjectStore((s) => s.updateProject);
+  const user = useAuthStore((s) => s.user);
+  const [showInvite, setShowInvite] = useState(false);
 
-  const members = activeProject?.members ?? []
-  const currentUserMember = members.find((m) => m.user.id === user?.id)
-  const currentUserRole = currentUserMember?.role ?? 'MEMBER'
+  const members = activeProject?.members ?? [];
+  const currentUserMember = members.find((m) => m.user.id === user?.id);
+  const currentUserRole = currentUserMember?.role ?? "MEMBER";
 
   const handleInvite = async ({ email, role }) => {
-    const { data } = await inviteProjectMemberApi(activeProject.id, { email, role })
+    const { data } = await inviteProjectMemberApi(activeProject.id, {
+      email,
+      role,
+    });
     const updated = {
       ...activeProject,
       members: [...members, data.member],
-    }
-    updateProject(activeProject.id, updated)
-  }
+    };
+    updateProject(activeProject.id, updated);
+  };
 
   return (
     <>
@@ -36,9 +39,9 @@ export default function ProjectMembersModal({ isOpen, onClose }) {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              {members.length} member{members.length !== 1 ? 's' : ''}
+              {members.length} member{members.length !== 1 ? "s" : ""}
             </p>
-            {currentUserRole === 'ADMIN' && (
+            {currentUserRole === "ADMIN" && (
               <button
                 onClick={() => setShowInvite(true)}
                 className="btn-primary text-xs py-1.5"
@@ -63,5 +66,5 @@ export default function ProjectMembersModal({ isOpen, onClose }) {
         title="Invite to project"
       />
     </>
-  )
+  );
 }

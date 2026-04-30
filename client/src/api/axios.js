@@ -2,9 +2,9 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '/api',
+  baseURL: import.meta.env.VITE_API_URL ?? "/api",
   withCredentials: true,
-})
+});
 
 let accessToken = null;
 

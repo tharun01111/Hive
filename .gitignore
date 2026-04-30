@@ -4,12 +4,12 @@ node_modules/
 .env.local
 
 
-server/prisma/migrations/
-
-
 postgres_data/
 redis_data/
 
 
 client/dist/
 server/dist/
+
+codex/
+gemini/
