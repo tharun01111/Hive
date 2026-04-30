@@ -5,8 +5,12 @@ const runMigrations = () => {
   try {
     execSync("npx prisma migrate deploy", { stdio: "inherit" });
     console.log("Migrations complete.");
+    
+    console.log("Generating Prisma Client...");
+    execSync("npx prisma generate", { stdio: "inherit" });
+    console.log("Prisma Client generated.");
   } catch (err) {
-    console.error("Migration failed:", err);
+    console.error("Migration/Generation failed:", err);
     process.exit(1);
   }
 };
