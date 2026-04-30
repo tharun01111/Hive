@@ -9,7 +9,7 @@ const messageWithUser = {
 export const getProjectMessages = async (projectId, { cursor, limit = 50 }) => {
   const messages = await prisma.message.findMany({
     where: { projectId },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     take: Number(limit),
     ...(cursor && { skip: 1, cursor: { id: cursor } }),
     include: messageWithUser,

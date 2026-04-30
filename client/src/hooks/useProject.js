@@ -11,7 +11,13 @@ export const useProject = (projectId) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!projectId) return;
+    if (!projectId) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
     const load = async () => {
       try {
         const [projectRes, columnsRes] = await Promise.all([

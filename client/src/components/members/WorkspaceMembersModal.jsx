@@ -17,14 +17,21 @@ export default function WorkspaceMembersModal({ isOpen, onClose }) {
   const currentUserRole = currentUserMember?.role ?? "MEMBER";
 
   const handleInvite = async ({ email, role }) => {
-    const { data } = await inviteMemberApi(activeWorkspace.id, { email, role });
+    try {
+      const { data } = await inviteMemberApi(activeWorkspace.id, {
+        email,
+        role,
+      });
 
-    // Update workspace members in store
-    const updated = {
-      ...activeWorkspace,
-      members: [...members, data.member],
-    };
-    updateWorkspace(activeWorkspace.id, updated);
+      const updated = {
+        ...activeWorkspace,
+        members: [...members, data.member],
+      };
+      updateWorkspace(activeWorkspace.id, updated);
+    } catch (err) {
+      console.error("Failed to invite workspace member", err);
+      throw err;
+    }
   };
 
   const handleRemove = async (userId) => {

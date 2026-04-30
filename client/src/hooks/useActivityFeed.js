@@ -11,33 +11,44 @@ export const useActivityFeed = () => {
   const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
-    if (!activeWorkspace?.id) return;
+    const workspaceId = activeWorkspace?.id;
+    if (!workspaceId) {
+      setActivities([]);
+      setNextCursor(null);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
 
     const load = async () => {
       try {
-        const { data } = await getWorkspaceActivitiesApi(activeWorkspace.id);
+        const { data } = await getWorkspaceActivitiesApi(workspaceId);
+        if (cancelled) return;
         setActivities(data.activities);
         setNextCursor(data.nextCursor);
       } catch (err) {
-        console.error("Failed to load activities", err);
+        if (!cancelled) console.error("Failed to load activities", err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     load();
 
-    // Join workspace room for real-time activity updates
     const socket = getSocket();
-    socket?.emit("join:workspace", activeWorkspace.id);
-
-    socket?.on("activity:new", ({ activity }) => {
+    const handleNewActivity = ({ activity }) => {
       setActivities((prev) => [activity, ...prev]);
-    });
+    };
+
+    socket?.emit("join:workspace", workspaceId);
+    socket?.on("activity:new", handleNewActivity);
 
     return () => {
-      socket?.emit("leave:workspace", activeWorkspace.id);
-      socket?.off("activity:new");
+      cancelled = true;
+      socket?.emit("leave:workspace", workspaceId);
+      socket?.off("activity:new", handleNewActivity);
     };
   }, [activeWorkspace?.id]);
 

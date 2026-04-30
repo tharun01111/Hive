@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import prisma from "../lib/prisma.js";
 import {
   generateAccessToken,
@@ -13,6 +14,19 @@ const getRefreshExpiry = () => {
   expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRY_DAYS);
   return expiresAt;
 };
+
+const hashRefreshToken = (token) => {
+  const secret = process.env.REFRESH_TOKEN_HASH_SECRET ?? process.env.JWT_REFRESH_SECRET;
+  return crypto.createHmac("sha256", secret).update(token).digest("hex");
+};
+
+const safeEqual = (a, b) => {
+  const left = Buffer.from(a);
+  const right = Buffer.from(b);
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+};
+
+const isUniqueConstraintError = (err) => err?.code === "P2002";
 
 export const registerUser = async ({ name, email, password }) => {
   const existing = await prisma.user.findUnique({
@@ -69,7 +83,7 @@ export const generateTokenPair = async (userId) => {
   await prisma.refreshToken.create({
     data: {
       userId,
-      token: refreshToken,
+      tokenHash: hashRefreshToken(refreshToken),
       expiresAt: getRefreshExpiry(),
     },
   });
@@ -85,31 +99,50 @@ export const rotateRefreshToken = async (token) => {
     throw { status: 401, message: "Invalid refresh token" };
   }
 
-  const stored = await prisma.refreshToken.findUnique({ where: { token } });
-
-  if (!stored || stored.expiresAt < new Date()) {
-    throw { status: 401, message: "Refresh token invalid or expired" };
-  }
-
-  await prisma.refreshToken.delete({ where: { token } });
-
   const newAccessToken = generateAccessToken(payload.userId);
   const newRefreshToken = generateRefreshToken(payload.userId);
+  const tokenHash = hashRefreshToken(token);
+  const newTokenHash = hashRefreshToken(newRefreshToken);
 
-  await prisma.refreshToken.create({
-    data: {
-      userId: payload.userId,
-      token: newRefreshToken,
-      expiresAt: getRefreshExpiry(),
-    },
-  });
+  try {
+    await prisma.$transaction(async (tx) => {
+      const stored = await tx.refreshToken.findUnique({
+        where: { tokenHash },
+      });
+
+      if (
+        !stored ||
+        !safeEqual(stored.tokenHash, tokenHash) ||
+        stored.expiresAt < new Date()
+      ) {
+        throw { status: 401, message: "Refresh token invalid or expired" };
+      }
+
+      await tx.refreshToken.delete({ where: { tokenHash } });
+
+      await tx.refreshToken.create({
+        data: {
+          userId: payload.userId,
+          tokenHash: newTokenHash,
+          expiresAt: getRefreshExpiry(),
+        },
+      });
+    });
+  } catch (err) {
+    if (isUniqueConstraintError(err)) {
+      throw { status: 409, message: "Refresh token rotation conflict" };
+    }
+    throw err;
+  }
 
   return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 };
 
 export const revokeRefreshToken = async (token) => {
   if (token) {
-    await prisma.refreshToken.deleteMany({ where: { token } });
+    await prisma.refreshToken.deleteMany({
+      where: { tokenHash: hashRefreshToken(token) },
+    });
   }
 };
 

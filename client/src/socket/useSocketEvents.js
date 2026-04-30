@@ -12,7 +12,6 @@ export const useSocketEvents = (projectId) => {
   const updateCard = useKanbanStore((s) => s.updateCard);
   const removeCard = useKanbanStore((s) => s.removeCard);
   const setColumns = useKanbanStore((s) => s.setColumns);
-  const columns = useKanbanStore((s) => s.columns);
 
   const addMessage = useChatStore((s) => s.addMessage);
   const removeMessage = useChatStore((s) => s.removeMessage);
@@ -40,8 +39,9 @@ export const useSocketEvents = (projectId) => {
     );
     socket.on("column:deleted", ({ columnId }) => removeColumn(columnId));
     socket.on("columns:reordered", ({ columns: reordered }) => {
+      const currentColumns = useKanbanStore.getState().columns;
       setColumns(
-        columns
+        currentColumns
           .map((c) => {
             const updated = reordered.find((col) => col.id === c.id);
             return updated ? { ...c, order: updated.order } : c;

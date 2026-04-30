@@ -20,7 +20,7 @@ router.post(
   register,
 );
 router.post("/login", authRateLimiter, validate(authSchemas.login), login);
-router.post("/refresh", authRateLimiter, refresh);
+router.post("/refresh", authRateLimiter, validate(authSchemas.refresh), refresh);
 router.post("/logout", logout);
 router.get("/me", authenticate, me);
 

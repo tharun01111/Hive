@@ -125,6 +125,7 @@ export const registerKanbanHandlers = (io, socket) => {
         description,
         dueDate,
       });
+      socket.emit("card:update:ack", { card, projectId });
       io.to(`project:${projectId}`).emit("card:updated", { card, projectId });
       await logProjectActivity({
         io,
@@ -137,6 +138,10 @@ export const registerKanbanHandlers = (io, socket) => {
       });
     } catch (err) {
       console.error("Socket card:update error:", err);
+      socket.emit("card:update:error", {
+        cardId,
+        message: err.message ?? "Failed to update card",
+      });
       socket.emit("error", { message: err.message ?? "Failed to update card" });
     }
   });
@@ -148,6 +153,7 @@ export const registerKanbanHandlers = (io, socket) => {
     try {
       if (!(await requireProjectMember(socket, projectId))) return;
       const card = await deleteCard(projectId, cardId);
+      socket.emit("card:delete:ack", { cardId, projectId });
       io.to(`project:${projectId}`).emit("card:deleted", { cardId, projectId });
       await logProjectActivity({
         io,
@@ -160,6 +166,10 @@ export const registerKanbanHandlers = (io, socket) => {
       });
     } catch (err) {
       console.error("Socket card:delete error:", err);
+      socket.emit("card:delete:error", {
+        cardId,
+        message: err.message ?? "Failed to delete card",
+      });
       socket.emit("error", { message: err.message ?? "Failed to delete card" });
     }
   });

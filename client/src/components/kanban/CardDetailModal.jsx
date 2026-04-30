@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useKanbanStore } from "../../store/kanban.store.js";
 import { useProjectStore } from "../../store/project.store.js";
 import { getSocket } from "../../socket/socket.js";
@@ -18,33 +18,87 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
       ? new Date(card.dueDate).toISOString().split("T")[0]
       : "",
   });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setForm({
+      title: card.title,
+      description: card.description ?? "",
+      dueDate: card.dueDate
+        ? new Date(card.dueDate).toISOString().split("T")[0]
+        : "",
+    });
+    setEditing(false);
+    setError("");
+  }, [card]);
 
   const handleSave = () => {
     if (!form.title.trim()) return;
+    if (!socket) {
+      setError("Realtime connection is not available");
+      return;
+    }
 
-    socket?.emit("card:update", {
+    const cleanup = () => {
+      socket.off("card:update:ack", handleAck);
+      socket.off("card:update:error", handleError);
+    };
+
+    const handleAck = ({ card: updatedCard }) => {
+      if (updatedCard.id !== card.id) return;
+      cleanup();
+      updateCard(updatedCard);
+      setEditing(false);
+      setError("");
+    };
+
+    const handleError = ({ cardId, message }) => {
+      if (cardId !== card.id) return;
+      cleanup();
+      setError(message ?? "Failed to update card");
+    };
+
+    socket.on("card:update:ack", handleAck);
+    socket.on("card:update:error", handleError);
+
+    socket.emit("card:update", {
       cardId: card.id,
       title: form.title.trim(),
       description: form.description.trim(),
       dueDate: form.dueDate || null,
       projectId,
     });
-
-    updateCard({
-      ...card,
-      title: form.title.trim(),
-      description: form.description.trim(),
-      dueDate: form.dueDate || null,
-    });
-
-    setEditing(false);
   };
 
   const handleDelete = () => {
     if (!window.confirm("Delete this card?")) return;
-    socket?.emit("card:delete", { cardId: card.id, projectId });
-    removeCard(card.id);
-    onClose();
+    if (!socket) {
+      setError("Realtime connection is not available");
+      return;
+    }
+
+    const cleanup = () => {
+      socket.off("card:delete:ack", handleAck);
+      socket.off("card:delete:error", handleError);
+    };
+
+    const handleAck = ({ cardId }) => {
+      if (cardId !== card.id) return;
+      cleanup();
+      removeCard(card.id);
+      setError("");
+      onClose();
+    };
+
+    const handleError = ({ cardId, message }) => {
+      if (cardId !== card.id) return;
+      cleanup();
+      setError(message ?? "Failed to delete card");
+    };
+
+    socket.on("card:delete:ack", handleAck);
+    socket.on("card:delete:error", handleError);
+    socket.emit("card:delete", { cardId: card.id, projectId });
   };
 
   const handleAssign = (userId) => {
@@ -169,6 +223,12 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
         </div>
 
         {/* Actions */}
+        {error && (
+          <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-notion">
+            {error}
+          </p>
+        )}
+
         <div className="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-neutral-800">
           <button onClick={handleDelete} className="btn-danger text-xs py-1.5">
             Delete card

@@ -4,10 +4,22 @@ const uuid = z.string().uuid();
 const nonEmptyString = z.string().trim().min(1);
 const optionalText = z.string().trim().optional().nullable();
 const role = z.enum(["ADMIN", "MEMBER"]).optional();
+const strictDateString = (value) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+};
 const dateLike = z
   .string()
-  .refine((value) => !Number.isNaN(Date.parse(value)), {
-    message: "Invalid date",
+  .refine(strictDateString, {
+    message: "Date must be a valid YYYY-MM-DD date",
   })
   .optional()
   .nullable();
@@ -25,6 +37,11 @@ export const authSchemas = {
     body: z.object({
       email: z.string().trim().email().max(255),
       password: z.string().min(1).max(128),
+    }),
+  }),
+  refresh: z.object({
+    cookies: z.object({
+      refreshToken: nonEmptyString,
     }),
   }),
 };

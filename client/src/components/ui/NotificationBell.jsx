@@ -33,8 +33,12 @@ export default function NotificationBell() {
     setOpen(!open);
 
     if (!open && unreadCount > 0) {
-      await markAllAsReadApi();
-      markAllAsRead();
+      try {
+        await markAllAsReadApi();
+        markAllAsRead();
+      } catch (err) {
+        console.error("Failed to mark notifications as read", err);
+      }
     }
   };
 

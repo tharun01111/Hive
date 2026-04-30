@@ -1,5 +1,7 @@
 import prisma from "../lib/prisma.js";
 
+const MAX_ORDER_RETRIES = 3;
+
 const cardWithAssignees = {
   assignees: {
     include: {
@@ -9,6 +11,8 @@ const cardWithAssignees = {
     },
   },
 };
+
+const isUniqueConstraintError = (err) => err?.code === "P2002";
 
 const assertColumnInProject = async (columnId, projectId) => {
   const column = await prisma.column.findFirst({
@@ -64,17 +68,31 @@ export const getProjectColumns = async (projectId) => {
 };
 
 export const createColumn = async ({ name, projectId }) => {
-  const lastColumn = await prisma.column.findFirst({
-    where: { projectId },
-    orderBy: { order: "desc" },
-  });
+  const trimmedName = name.trim();
 
-  const order = lastColumn ? lastColumn.order + 1 : 0;
+  for (let attempt = 0; attempt < MAX_ORDER_RETRIES; attempt += 1) {
+    try {
+      return await prisma.$transaction(async (tx) => {
+        const lastColumn = await tx.column.findFirst({
+          where: { projectId },
+          orderBy: { order: "desc" },
+        });
 
-  return prisma.column.create({
-    data: { name: name.trim(), order, projectId },
-    include: { cards: true },
-  });
+        const order = lastColumn ? lastColumn.order + 1 : 0;
+
+        return tx.column.create({
+          data: { name: trimmedName, order, projectId },
+          include: { cards: true },
+        });
+      });
+    } catch (err) {
+      if (!isUniqueConstraintError(err) || attempt === MAX_ORDER_RETRIES - 1) {
+        throw err;
+      }
+    }
+  }
+
+  throw { status: 409, message: "Could not allocate column order" };
 };
 
 export const updateColumn = async (projectId, columnId, { name }) => {
@@ -102,14 +120,20 @@ export const reorderColumns = async (projectId, columns) => {
     throw { status: 400, message: "All columns must belong to this project" };
   }
 
-  return prisma.$transaction(
-    columns.map((col) =>
+  return prisma.$transaction([
+    ...columns.map((col, index) =>
+      prisma.column.update({
+        where: { id: col.id },
+        data: { order: -index - 1 },
+      }),
+    ),
+    ...columns.map((col) =>
       prisma.column.update({
         where: { id: col.id },
         data: { order: col.order },
       }),
     ),
-  );
+  ]);
 };
 
 export const createCard = async ({
@@ -121,23 +145,39 @@ export const createCard = async ({
 }) => {
   await assertColumnInProject(columnId, projectId);
 
-  const lastCard = await prisma.card.findFirst({
-    where: { columnId },
-    orderBy: { order: "desc" },
-  });
+  const trimmedTitle = title.trim();
+  const trimmedDescription = description?.trim();
+  const parsedDueDate = dueDate ? new Date(dueDate) : null;
 
-  const order = lastCard ? lastCard.order + 1 : 0;
+  for (let attempt = 0; attempt < MAX_ORDER_RETRIES; attempt += 1) {
+    try {
+      return await prisma.$transaction(async (tx) => {
+        const lastCard = await tx.card.findFirst({
+          where: { columnId },
+          orderBy: { order: "desc" },
+        });
 
-  return prisma.card.create({
-    data: {
-      title: title.trim(),
-      description: description?.trim(),
-      dueDate: dueDate ? new Date(dueDate) : null,
-      order,
-      columnId,
-    },
-    include: cardWithAssignees,
-  });
+        const order = lastCard ? lastCard.order + 1 : 0;
+
+        return tx.card.create({
+          data: {
+            title: trimmedTitle,
+            description: trimmedDescription,
+            dueDate: parsedDueDate,
+            order,
+            columnId,
+          },
+          include: cardWithAssignees,
+        });
+      });
+    } catch (err) {
+      if (!isUniqueConstraintError(err) || attempt === MAX_ORDER_RETRIES - 1) {
+        throw err;
+      }
+    }
+  }
+
+  throw { status: 409, message: "Could not allocate card order" };
 };
 
 export const getCardById = async (projectId, cardId) => {
@@ -202,14 +242,20 @@ export const reorderCards = async (projectId, cards) => {
     };
   }
 
-  return prisma.$transaction(
-    cards.map((card) =>
+  return prisma.$transaction([
+    ...cards.map((card, index) =>
+      prisma.card.update({
+        where: { id: card.id },
+        data: { order: -index - 1 },
+      }),
+    ),
+    ...cards.map((card) =>
       prisma.card.update({
         where: { id: card.id },
         data: { order: card.order, columnId: card.columnId },
       }),
     ),
-  );
+  ]);
 };
 
 export const assignCard = async (projectId, cardId, userId) => {
@@ -237,7 +283,13 @@ export const assignCard = async (projectId, cardId, userId) => {
 export const unassignCard = async (projectId, cardId, userId) => {
   await assertCardInProject(cardId, projectId);
 
-  return prisma.cardAssignee.delete({
-    where: { cardId_userId: { cardId, userId } },
+  const result = await prisma.cardAssignee.deleteMany({
+    where: { cardId, userId },
   });
+
+  if (result.count === 0) {
+    throw { status: 404, message: "Card assignment not found" };
+  }
+
+  return result;
 };

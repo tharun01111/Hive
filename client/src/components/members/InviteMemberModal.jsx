@@ -59,6 +59,7 @@ export default function InviteMemberModal({
               <button
                 key={r}
                 type="button"
+                aria-pressed={role === r}
                 onClick={() => setRole(r)}
                 className={`flex-1 py-2 px-3 rounded-notion text-sm font-medium border transition-colors ${
                   role === r

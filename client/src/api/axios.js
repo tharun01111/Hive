@@ -57,11 +57,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await axios.post(
-          "/api/auth/refresh",
-          {},
-          { withCredentials: true },
-        );
+        const { data } = await api.post("/auth/refresh", {});
         const newToken = data.accessToken;
         setApiToken(newToken);
         const { useAuthStore } = await import("../store/auth.store.js");
