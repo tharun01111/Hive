@@ -1,6 +1,7 @@
 import "dotenv/config";
 import http from "http";
 import express from "express";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import workspaceRoutes from "./routes/workspace.routes.js";
@@ -14,6 +15,14 @@ import { initSocket } from "./sockets/index.js";
 
 const app = express();
 app.set("trust proxy", 1);
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  }),
+);
+
 const httpServer = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
