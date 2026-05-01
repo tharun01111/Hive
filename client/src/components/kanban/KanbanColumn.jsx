@@ -1,36 +1,103 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
+import { useAuthStore } from "../../store/auth.store.js";
 import { useKanbanStore } from "../../store/kanban.store.js";
-import { getSocket } from "../../socket/socket.js";
+import { ensureSocket } from "../../socket/socket.js";
 import KanbanCard from "./KanbanCard.jsx";
 import EmptyState from "../ui/EmptyState.jsx";
 
+const createTempId = () =>
+  `temp-card-${crypto.randomUUID?.() ?? Date.now().toString(36)}`;
+
+const toDateInputValue = (date) => date.toISOString().slice(0, 10);
+
+const buildDueDate = (date, time) => {
+  if (!date) return null;
+  if (!time) return date;
+  return new Date(`${date}T${time}:00`).toISOString();
+};
+
 export default function KanbanColumn({ column, index, projectId }) {
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const addCard = useKanbanStore((s) => s.addCard);
+  const confirmCard = useKanbanStore((s) => s.confirmCard);
+  const removeCard = useKanbanStore((s) => s.removeCard);
   const removeColumn = useKanbanStore((s) => s.removeColumn);
   const [addingCard, setAddingCard] = useState(false);
   const [cardTitle, setCardTitle] = useState("");
+  const [cardDueDate, setCardDueDate] = useState("");
+  const [cardDueTime, setCardDueTime] = useState("");
   const [editingName, setEditingName] = useState(false);
   const [columnName, setColumnName] = useState(column.name);
-  const socket = getSocket();
+
+  const resetCardForm = () => {
+    setCardTitle("");
+    setCardDueDate("");
+    setCardDueTime("");
+  };
 
   const handleAddCard = (e) => {
     e.preventDefault();
     if (!cardTitle.trim()) return;
 
-    socket?.emit("card:create", {
+    const socket = ensureSocket(accessToken);
+    if (!socket) return;
+    const trimmedTitle = cardTitle.trim();
+    const clientId = createTempId();
+    const dueDate = buildDueDate(cardDueDate, cardDueTime);
+
+    const cleanup = () => {
+      socket.off("card:create:ack", handleAck);
+      socket.off("card:create:error", handleError);
+    };
+
+    const handleAck = ({ card, clientId: ackClientId }) => {
+      if (ackClientId !== clientId) return;
+      cleanup();
+      confirmCard(clientId, card);
+    };
+
+    const handleError = ({ clientId: errorClientId, message }) => {
+      if (errorClientId !== clientId) return;
+      cleanup();
+      removeCard(clientId);
+      toast.error(message ?? "Failed to create card");
+    };
+
+    addCard({
+      id: clientId,
       columnId: column.id,
-      title: cardTitle.trim(),
-      projectId,
+      title: trimmedTitle,
+      description: null,
+      dueDate,
+      order: column.cards?.length ?? 0,
+      assignees: [],
+      pending: true,
+      createdAt: new Date().toISOString(),
     });
 
-    setCardTitle("");
+    socket.on("card:create:ack", handleAck);
+    socket.on("card:create:error", handleError);
+
+    socket.emit("card:create", {
+      columnId: column.id,
+      title: trimmedTitle,
+      dueDate,
+      projectId,
+      clientId,
+    });
+
+    resetCardForm();
     setAddingCard(false);
   };
 
   const handleDeleteColumn = () => {
     if (!window.confirm(`Delete column "${column.name}" and all its cards?`))
       return;
-    socket?.emit("column:delete", { columnId: column.id, projectId });
+    const socket = ensureSocket(accessToken);
+    if (!socket) return;
+    socket.emit("column:delete", { columnId: column.id, projectId });
     removeColumn(column.id);
   };
 
@@ -40,7 +107,10 @@ export default function KanbanColumn({ column, index, projectId }) {
       setEditingName(false);
       return;
     }
-    socket?.emit("column:update", {
+    const socket = ensureSocket(accessToken);
+    if (!socket) return;
+
+    socket.emit("column:update", {
       columnId: column.id,
       name: columnName.trim(),
       projectId,
@@ -56,7 +126,7 @@ export default function KanbanColumn({ column, index, projectId }) {
           {...provided.draggableProps}
           className={`w-72 shrink-0 flex flex-col rounded-notion bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 border-t-2 border-t-neutral-300 dark:border-t-neutral-700 max-h-full ${
             snapshot.isDragging ? "shadow-notion-lg rotate-1" : ""
-          }`}
+          } ${column.pending ? "opacity-70" : ""}`}
         >
           {/* Column header */}
           <div
@@ -82,6 +152,9 @@ export default function KanbanColumn({ column, index, projectId }) {
                 <span className="ml-2 rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400 font-normal">
                   {column.cards?.length ?? 0}
                 </span>
+                {column.pending && (
+                  <span className="ml-2 inline-flex h-3 w-3 animate-spin rounded-full border border-neutral-300 border-t-neutral-600 align-middle dark:border-neutral-700 dark:border-t-neutral-200" />
+                )}
               </button>
             )}
 
@@ -164,6 +237,54 @@ export default function KanbanColumn({ column, index, projectId }) {
                       rows={2}
                       className="input text-sm resize-none"
                     />
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-[1fr_auto] gap-2">
+                        <input
+                          type="date"
+                          value={cardDueDate}
+                          onChange={(e) => setCardDueDate(e.target.value)}
+                          className="input text-xs"
+                        />
+                        <input
+                          type="time"
+                          value={cardDueTime}
+                          onChange={(e) => setCardDueTime(e.target.value)}
+                          className="input w-28 text-xs"
+                          disabled={!cardDueDate}
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setCardDueDate(toDateInputValue(new Date()))}
+                          className="btn-ghost px-2 py-1 text-xs"
+                        >
+                          Today
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const date = new Date();
+                            date.setDate(date.getDate() + 1);
+                            setCardDueDate(toDateInputValue(date));
+                          }}
+                          className="btn-ghost px-2 py-1 text-xs"
+                        >
+                          Tomorrow
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const date = new Date();
+                            date.setDate(date.getDate() + 7);
+                            setCardDueDate(toDateInputValue(date));
+                          }}
+                          className="btn-ghost px-2 py-1 text-xs"
+                        >
+                          Next week
+                        </button>
+                      </div>
+                    </div>
                     <div className="flex items-center gap-2">
                       <button
                         type="submit"
@@ -175,7 +296,7 @@ export default function KanbanColumn({ column, index, projectId }) {
                         type="button"
                         onClick={() => {
                           setAddingCard(false);
-                          setCardTitle("");
+                          resetCardForm();
                         }}
                         className="btn-ghost py-1 px-2 text-xs"
                       >

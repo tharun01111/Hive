@@ -86,11 +86,17 @@ export const registerKanbanHandlers = (io, socket) => {
   });
 
   socket.on("card:create", async (data) => {
-    const { columnId, title, description, dueDate, projectId } = data;
+    const { columnId, title, description, dueDate, projectId, clientId } = data;
     if (!columnId || !title?.trim() || !projectId) return;
 
     try {
-      if (!(await requireProjectMember(socket, projectId))) return;
+      if (!(await requireProjectMember(socket, projectId))) {
+        socket.emit("card:create:error", {
+          clientId,
+          message: "Not authorized for this project",
+        });
+        return;
+      }
       const card = await createCard({
         title,
         description,
@@ -98,7 +104,12 @@ export const registerKanbanHandlers = (io, socket) => {
         columnId,
         projectId,
       });
-      io.to(`project:${projectId}`).emit("card:created", { card, projectId });
+      socket.emit("card:create:ack", { card, projectId, clientId });
+      io.to(`project:${projectId}`).emit("card:created", {
+        card,
+        projectId,
+        clientId,
+      });
       await logProjectActivity({
         io,
         socket,
@@ -110,6 +121,10 @@ export const registerKanbanHandlers = (io, socket) => {
       });
     } catch (err) {
       console.error("Socket card:create error:", err);
+      socket.emit("card:create:error", {
+        clientId,
+        message: err.message ?? "Failed to create card",
+      });
       socket.emit("error", { message: err.message ?? "Failed to create card" });
     }
   });
@@ -261,15 +276,23 @@ export const registerKanbanHandlers = (io, socket) => {
   });
 
   socket.on("column:create", async (data) => {
-    const { name, projectId } = data;
+    const { name, projectId, clientId } = data;
     if (!name?.trim() || !projectId) return;
 
     try {
-      if (!(await requireProjectMember(socket, projectId))) return;
+      if (!(await requireProjectMember(socket, projectId))) {
+        socket.emit("column:create:error", {
+          clientId,
+          message: "Not authorized for this project",
+        });
+        return;
+      }
       const column = await createColumn({ name, projectId });
+      socket.emit("column:create:ack", { column, projectId, clientId });
       io.to(`project:${projectId}`).emit("column:created", {
         column,
         projectId,
+        clientId,
       });
       await logProjectActivity({
         io,
@@ -282,6 +305,10 @@ export const registerKanbanHandlers = (io, socket) => {
       });
     } catch (err) {
       console.error("Socket column:create error:", err);
+      socket.emit("column:create:error", {
+        clientId,
+        message: err.message ?? "Failed to create column",
+      });
       socket.emit("error", {
         message: err.message ?? "Failed to create column",
       });

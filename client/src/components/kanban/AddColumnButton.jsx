@@ -1,18 +1,63 @@
 import { useState } from "react";
-import { getSocket } from "../../socket/socket.js";
+import toast from "react-hot-toast";
+import { useAuthStore } from "../../store/auth.store.js";
+import { useKanbanStore } from "../../store/kanban.store.js";
+import { ensureSocket } from "../../socket/socket.js";
+
+const createTempId = () =>
+  `temp-column-${crypto.randomUUID?.() ?? Date.now().toString(36)}`;
 
 export default function AddColumnButton({ projectId }) {
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const addColumn = useKanbanStore((s) => s.addColumn);
+  const confirmColumn = useKanbanStore((s) => s.confirmColumn);
+  const removeColumn = useKanbanStore((s) => s.removeColumn);
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
-  const socket = getSocket();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    socket?.emit("column:create", {
-      name: name.trim(),
+    const socket = ensureSocket(accessToken);
+    if (!socket) return;
+    const trimmedName = name.trim();
+    const clientId = createTempId();
+
+    const cleanup = () => {
+      socket.off("column:create:ack", handleAck);
+      socket.off("column:create:error", handleError);
+    };
+
+    const handleAck = ({ column, clientId: ackClientId }) => {
+      if (ackClientId !== clientId) return;
+      cleanup();
+      confirmColumn(clientId, column);
+    };
+
+    const handleError = ({ clientId: errorClientId, message }) => {
+      if (errorClientId !== clientId) return;
+      cleanup();
+      removeColumn(clientId);
+      toast.error(message ?? "Failed to create column");
+    };
+
+    addColumn({
+      id: clientId,
+      name: trimmedName,
       projectId,
+      order: useKanbanStore.getState().columns.length,
+      cards: [],
+      pending: true,
+    });
+
+    socket.on("column:create:ack", handleAck);
+    socket.on("column:create:error", handleError);
+
+    socket.emit("column:create", {
+      name: trimmedName,
+      projectId,
+      clientId,
     });
 
     setName("");

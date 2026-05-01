@@ -9,19 +9,28 @@ export const useProjects = (workspaceId) => {
 
   useEffect(() => {
     if (!workspaceId) return;
+    let cancelled = false;
+
     const load = async () => {
       setLoading(true);
       try {
         const { data } = await getProjectsApi(workspaceId);
+        if (cancelled) return;
         setProjects(data.projects);
       } catch (err) {
-        setError(err);
-        console.error("Failed to load projects", err);
+        if (!cancelled) {
+          setError(err);
+          console.error("Failed to load projects", err);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     load();
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId]);
 

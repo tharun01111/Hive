@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useAuthStore } from "../store/auth.store.js";
 import { useWorkspaceStore } from "../store/workspace.store.js";
 import { getWorkspaceActivitiesApi } from "../api/activity.api.js";
-import { getSocket } from "../socket/socket.js";
+import { ensureSocket } from "../socket/socket.js";
 
 export const useActivityFeed = () => {
+  const accessToken = useAuthStore((s) => s.accessToken);
   const activeWorkspace = useWorkspaceStore((s) => s.activeWorkspace);
   const [activities, setActivities] = useState([]);
   const [nextCursor, setNextCursor] = useState(null);
@@ -37,7 +39,7 @@ export const useActivityFeed = () => {
 
     load();
 
-    const socket = getSocket();
+    const socket = ensureSocket(accessToken);
     const handleNewActivity = ({ activity }) => {
       setActivities((prev) => [activity, ...prev]);
     };
@@ -50,7 +52,7 @@ export const useActivityFeed = () => {
       socket?.emit("leave:workspace", workspaceId);
       socket?.off("activity:new", handleNewActivity);
     };
-  }, [activeWorkspace?.id]);
+  }, [activeWorkspace?.id, accessToken]);
 
   const loadMore = async () => {
     if (!nextCursor || loadingMore) return;

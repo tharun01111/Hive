@@ -9,7 +9,29 @@ export const useChatStore = create((set) => ({
 
   addMessage: (message) =>
     set((state) => ({
-      messages: [...state.messages, message],
+      messages: state.messages.some((m) => m.id === message.id)
+        ? state.messages.map((m) =>
+            m.id === message.id ? { ...m, ...message } : m,
+          )
+        : [...state.messages, message],
+    })),
+
+  confirmMessage: (clientId, message) =>
+    set((state) => ({
+      messages: state.messages.some((m) => m.id === clientId)
+        ? state.messages.map((m) => (m.id === clientId ? message : m))
+        : state.messages.some((m) => m.id === message.id)
+          ? state.messages.map((m) =>
+              m.id === message.id ? { ...m, ...message } : m,
+            )
+          : [...state.messages, message],
+    })),
+
+  markMessageFailed: (messageId) =>
+    set((state) => ({
+      messages: state.messages.map((m) =>
+        m.id === messageId ? { ...m, pending: false, failed: true } : m,
+      ),
     })),
 
   prependMessages: (messages, nextCursor) =>

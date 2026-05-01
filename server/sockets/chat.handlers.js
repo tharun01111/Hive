@@ -18,12 +18,18 @@ const requireProjectMember = async (socket, projectId) => {
 
 export const registerChatHandlers = (io, socket) => {
   socket.on("message:send", async (data) => {
-    const { projectId, content } = data;
+    const { projectId, content, clientId } = data;
 
     if (!projectId || !content?.trim()) return;
 
     try {
-      if (!(await requireProjectMember(socket, projectId))) return;
+      if (!(await requireProjectMember(socket, projectId))) {
+        socket.emit("message:send:error", {
+          clientId,
+          message: "Not authorized for this project",
+        });
+        return;
+      }
 
       const message = await createMessage({
         content,
@@ -31,9 +37,18 @@ export const registerChatHandlers = (io, socket) => {
         userId: socket.userId,
       });
 
-      io.to(`project:${projectId}`).emit("message:received", { message });
+      socket.emit("message:send:ack", { message, projectId, clientId });
+      io.to(`project:${projectId}`).emit("message:received", {
+        message,
+        projectId,
+        clientId,
+      });
     } catch (err) {
       console.error("Socket message:send error:", err);
+      socket.emit("message:send:error", {
+        clientId,
+        message: "Failed to send message",
+      });
       socket.emit("error", { message: "Failed to send message" });
     }
   });

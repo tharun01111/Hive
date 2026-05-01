@@ -1,11 +1,13 @@
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
+import { useAuthStore } from "../../store/auth.store.js";
 import { useKanbanStore } from "../../store/kanban.store.js";
-import { getSocket } from "../../socket/socket.js";
+import { ensureSocket } from "../../socket/socket.js";
 import KanbanColumn from "./KanbanColumn.jsx";
 import AddColumnButton from "./AddColumnButton.jsx";
 import EmptyState from "../ui/EmptyState.jsx";
 
 export default function KanbanBoard({ projectId }) {
+  const accessToken = useAuthStore((s) => s.accessToken);
   const columns = useKanbanStore((s) => s.columns);
   const moveCard = useKanbanStore((s) => s.moveCard);
   const reorderColumns = useKanbanStore((s) => s.reorderColumns);
@@ -20,7 +22,7 @@ export default function KanbanBoard({ projectId }) {
     )
       return;
 
-    const socket = getSocket();
+    const socket = ensureSocket(accessToken);
 
     if (type === "COLUMN") {
       const reordered = Array.from(columns);

@@ -1,6 +1,7 @@
 import { motion as Motion } from "framer-motion";
 import { useActivityFeed } from "../../hooks/useActivityFeed.js";
 import EmptyState from "../ui/EmptyState.jsx";
+import { ActivitySkeleton } from "../ui/Skeleton.jsx";
 
 const ACTIVITY_LABELS = {
   CARD_CREATED: "created card",
@@ -40,11 +41,7 @@ export default function ActivityFeed() {
     useActivityFeed();
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-900 dark:border-neutral-700 dark:border-t-neutral-100 rounded-full animate-spin" />
-      </div>
-    );
+    return <ActivitySkeleton />;
   }
 
   if (activities.length === 0) {

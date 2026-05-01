@@ -7,7 +7,27 @@ export const useKanbanStore = create((set) => ({
 
   addColumn: (column) =>
     set((state) => ({
-      columns: [...state.columns, { ...column, cards: [] }],
+      columns: state.columns.some((c) => c.id === column.id)
+        ? state.columns.map((c) =>
+            c.id === column.id ? { ...c, ...column, cards: c.cards ?? [] } : c,
+          )
+        : [...state.columns, { ...column, cards: column.cards ?? [] }],
+    })),
+
+  confirmColumn: (clientId, column) =>
+    set((state) => ({
+      columns: state.columns
+        .map((c) =>
+          c.id === clientId
+            ? { ...column, cards: column.cards ?? c.cards ?? [] }
+            : c.id === column.id
+              ? { ...c, ...column, cards: c.cards ?? column.cards ?? [] }
+              : c,
+        )
+        .filter(
+          (c, index, columns) =>
+            columns.findIndex((candidate) => candidate.id === c.id) === index,
+        ),
     })),
 
   updateColumn: (columnId, data) =>
@@ -25,17 +45,64 @@ export const useKanbanStore = create((set) => ({
   addCard: (card) =>
     set((state) => ({
       columns: state.columns.map((c) =>
-        c.id === card.columnId ? { ...c, cards: [...c.cards, card] } : c,
+        c.id === card.columnId
+          ? {
+              ...c,
+              cards: c.cards.some((k) => k.id === card.id)
+                ? c.cards.map((k) => (k.id === card.id ? { ...k, ...card } : k))
+                : [...c.cards, card],
+            }
+          : c,
       ),
     })),
 
-  updateCard: (card) =>
+  confirmCard: (clientId, card) =>
     set((state) => ({
-      columns: state.columns.map((c) => ({
-        ...c,
-        cards: c.cards.map((k) => (k.id === card.id ? { ...k, ...card } : k)),
-      })),
+      columns: state.columns.map((c) => {
+        const cards = c.cards
+          .map((k) => (k.id === clientId ? { ...card } : k))
+          .filter((k) => k.id !== card.id || k.id === clientId);
+
+        if (c.id !== card.columnId) {
+          return { ...c, cards: cards.filter((k) => k.id !== card.id) };
+        }
+
+        if (cards.some((k) => k.id === card.id)) {
+          return {
+            ...c,
+            cards: cards.map((k) => (k.id === card.id ? { ...k, ...card } : k)),
+          };
+        }
+
+        return { ...c, cards: [...cards, card] };
+      }),
     })),
+
+  updateCard: (card) =>
+    set((state) => {
+      const existing = state.columns
+        .flatMap((c) => c.cards)
+        .find((k) => k.id === card.id);
+      const merged = existing ? { ...existing, ...card } : card;
+
+      return {
+        columns: state.columns.map((c) => {
+          const cards = c.cards.filter((k) => k.id !== card.id);
+
+          if (c.id !== merged.columnId) {
+            return { ...c, cards };
+          }
+
+          const insertAt = Number.isInteger(merged.order)
+            ? Math.min(Math.max(merged.order, 0), cards.length)
+            : cards.length;
+          const nextCards = [...cards];
+          nextCards.splice(insertAt, 0, merged);
+
+          return { ...c, cards: nextCards };
+        }),
+      };
+    }),
 
   removeCard: (cardId) =>
     set((state) => ({

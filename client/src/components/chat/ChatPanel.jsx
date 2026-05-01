@@ -1,25 +1,32 @@
 import { useState, useEffect, useRef } from "react";
+import toast from "react-hot-toast";
 import { motion as Motion } from "framer-motion";
 import { useAuthStore } from "../../store/auth.store.js";
 import { useMessages } from "../../hooks/useMessages.js";
 import { useChatStore } from "../../store/chat.store.js";
 import { useProjectStore } from "../../store/project.store.js";
-import { getSocket } from "../../socket/socket.js";
+import { ensureSocket } from "../../socket/socket.js";
 import ChatHeader from "./ChatHeader.jsx";
 import MessageList from "./MessageList.jsx";
 import TypingIndicator from "./TypingIndicator.jsx";
 import ChatComposer from "./ChatComposer.jsx";
 
+const createTempId = () =>
+  `temp-message-${crypto.randomUUID?.() ?? Date.now().toString(36)}`;
+
 export default function ChatPanel({ projectId, onClose }) {
   const user = useAuthStore((s) => s.user);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const activeProject = useProjectStore((s) => s.activeProject);
   const { messages, nextCursor, loading, loadingMore, loadMore } =
     useMessages(projectId);
+  const addMessage = useChatStore((s) => s.addMessage);
+  const confirmMessage = useChatStore((s) => s.confirmMessage);
+  const markMessageFailed = useChatStore((s) => s.markMessageFailed);
   const typingUsers = useChatStore((s) => s.typingUsers);
   const [content, setContent] = useState("");
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-  const socket = getSocket();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -28,14 +35,54 @@ export default function ChatPanel({ projectId, onClose }) {
   const handleSend = (e) => {
     e.preventDefault();
     if (!content.trim()) return;
-    socket?.emit("message:send", { projectId, content: content.trim() });
+    const socket = ensureSocket(accessToken);
+    if (!socket) return;
+    const trimmedContent = content.trim();
+    const clientId = createTempId();
+
+    const cleanup = () => {
+      socket.off("message:send:ack", handleAck);
+      socket.off("message:send:error", handleError);
+    };
+
+    const handleAck = ({ message, clientId: ackClientId }) => {
+      if (ackClientId !== clientId) return;
+      cleanup();
+      confirmMessage(clientId, message);
+    };
+
+    const handleError = ({ clientId: errorClientId, message }) => {
+      if (errorClientId !== clientId) return;
+      cleanup();
+      markMessageFailed(clientId);
+      toast.error(message ?? "Failed to send message");
+    };
+
+    addMessage({
+      id: clientId,
+      projectId,
+      userId: user?.id,
+      user,
+      content: trimmedContent,
+      createdAt: new Date().toISOString(),
+      pending: true,
+    });
+
+    socket.on("message:send:ack", handleAck);
+    socket.on("message:send:error", handleError);
+    socket.emit("message:send", {
+      projectId,
+      content: trimmedContent,
+      clientId,
+    });
     setContent("");
-    socket?.emit("typing:stop", { projectId });
+    socket.emit("typing:stop", { projectId });
     clearTimeout(typingTimeoutRef.current);
   };
 
   const handleTyping = (e) => {
     setContent(e.target.value);
+    const socket = ensureSocket(accessToken);
     socket?.emit("typing:start", { projectId, userName: user?.name });
     clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {

@@ -12,6 +12,10 @@ import Modal from "../../components/ui/Modal.jsx";
 import WorkspaceMembersModal from "../../components/members/WorkspaceMembersModal.jsx";
 import ActivityPanel from "../../components/activity/ActivityPanel.jsx";
 import EmptyState from "../../components/ui/EmptyState.jsx";
+import {
+  Skeleton,
+  WorkspacePageSkeleton,
+} from "../../components/ui/Skeleton.jsx";
 import { AvatarStack } from "../../components/ui/Avatar.jsx";
 
 export default function WorkspacePage() {
@@ -21,8 +25,10 @@ export default function WorkspacePage() {
     useWorkspaceStore();
   const { addProject } = useProjectStore();
 
-  const { workspaces } = useWorkspaces();
-  const { projects } = useProjects(activeWorkspace?.id);
+  const { workspaces, loading: workspacesLoading } = useWorkspaces();
+  const { projects, loading: projectsLoading } = useProjects(
+    activeWorkspace?.id,
+  );
 
   const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
   const [showCreateProject, setShowCreateProject] = useState(false);
@@ -71,9 +77,12 @@ export default function WorkspacePage() {
   };
 
   return (
-    <AppLayout>
+    <AppLayout sidebarLoading={workspacesLoading}>
       <div className="flex h-full">
         <div className="flex-1 overflow-y-auto">
+          {workspacesLoading ? (
+            <WorkspacePageSkeleton />
+          ) : (
           <div className="p-8 max-w-4xl mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between gap-4 mb-8">
@@ -153,7 +162,9 @@ export default function WorkspacePage() {
                   </h2>
                 </div>
 
-                {projects.length === 0 ? (
+                {projectsLoading ? (
+                  <WorkspaceProjectsSkeleton />
+                ) : projects.length === 0 ? (
                   <div className="border border-dashed border-neutral-200 dark:border-neutral-800 rounded-notion">
                     <EmptyState
                       icon={<ProjectEmptyIcon />}
@@ -210,6 +221,7 @@ export default function WorkspacePage() {
               </>
             )}
           </div>
+          )}
         </div>
         {/* Activity panel */}
         <AnimatePresence>
@@ -413,3 +425,21 @@ const ProjectEmptyIcon = () => (
     />
   </svg>
 );
+
+function WorkspaceProjectsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {[0, 1, 2].map((item) => (
+        <div
+          key={item}
+          className="rounded-notion border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+        >
+          <Skeleton className="mb-4 h-8 w-8" />
+          <Skeleton className="mb-2 h-4 w-2/3" />
+          <Skeleton className="mb-4 h-3 w-full" />
+          <Skeleton className="h-3 w-24" />
+        </div>
+      ))}
+    </div>
+  );
+}

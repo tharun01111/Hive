@@ -43,6 +43,19 @@
 }
 
 @layer components {
+  @keyframes card-enter {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-card-enter {
+    animation: card-enter 160ms ease-out both;
+  }
+
   .btn-primary {
     @apply bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 
            px-4 py-2 rounded-notion text-sm font-medium 

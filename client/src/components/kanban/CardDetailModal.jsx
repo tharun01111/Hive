@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
+import { useAuthStore } from "../../store/auth.store.js";
 import { useKanbanStore } from "../../store/kanban.store.js";
 import { useProjectStore } from "../../store/project.store.js";
-import { getSocket } from "../../socket/socket.js";
+import { ensureSocket } from "../../socket/socket.js";
 import Modal from "../ui/Modal.jsx";
 
 export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
+  const accessToken = useAuthStore((s) => s.accessToken);
   const removeCard = useKanbanStore((s) => s.removeCard);
   const updateCard = useKanbanStore((s) => s.updateCard);
   const activeProject = useProjectStore((s) => s.activeProject);
-  const socket = getSocket();
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
@@ -34,6 +35,7 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
 
   const handleSave = () => {
     if (!form.title.trim()) return;
+    const socket = ensureSocket(accessToken);
     if (!socket) {
       setError("Realtime connection is not available");
       return;
@@ -72,6 +74,7 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
 
   const handleDelete = () => {
     if (!window.confirm("Delete this card?")) return;
+    const socket = ensureSocket(accessToken);
     if (!socket) {
       setError("Realtime connection is not available");
       return;
@@ -102,10 +105,12 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
   };
 
   const handleAssign = (userId) => {
+    const socket = ensureSocket(accessToken);
     socket?.emit("card:assign", { cardId: card.id, userId, projectId });
   };
 
   const handleUnassign = (userId) => {
+    const socket = ensureSocket(accessToken);
     socket?.emit("card:unassign", { cardId: card.id, userId, projectId });
   };
 

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import Sidebar from "./Sidebar.jsx";
+import { SidebarSkeleton } from "../ui/Skeleton.jsx";
 
-export default function AppLayout({ children }) {
+export default function AppLayout({ children, sidebarLoading = false }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
@@ -16,10 +17,14 @@ export default function AppLayout({ children }) {
           transition={{ duration: 0.18 }}
           className="shrink-0 overflow-hidden"
         >
-          <Sidebar
-            isOpen={sidebarOpen}
-            onToggle={() => setSidebarOpen(!sidebarOpen)}
-          />
+          {sidebarLoading ? (
+            <SidebarSkeleton collapsed={!sidebarOpen} />
+          ) : (
+            <Sidebar
+              isOpen={sidebarOpen}
+              onToggle={() => setSidebarOpen(!sidebarOpen)}
+            />
+          )}
         </Motion.div>
       </AnimatePresence>
       <main className="flex-1 overflow-y-auto">{children}</main>

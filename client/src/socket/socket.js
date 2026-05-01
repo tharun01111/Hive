@@ -30,6 +30,12 @@ export const initSocket = (token) => {
 
 export const getSocket = () => socket;
 
+export const ensureSocket = (token) => {
+  if (socket) return socket;
+  if (!token) return null;
+  return initSocket(token);
+};
+
 export const disconnectSocket = () => {
   if (socket) {
     socket.disconnect();

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { motion as Motion } from "framer-motion";
 import { useNotificationStore } from "../../store/notification.store.js";
 import { useNotifications } from "../../hooks/useNotifications.js";
 import { markAllAsReadApi } from "../../api/notification.api.js";
@@ -80,8 +81,11 @@ export default function NotificationBell() {
               />
             ) : (
               notifications.map((n) => (
-                <div
+                <Motion.div
                   key={n.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.16 }}
                   className={`px-4 py-3 border-b border-neutral-50 dark:border-neutral-800/50 last:border-0 ${
                     !n.read ? "bg-neutral-50 dark:bg-neutral-800/50" : ""
                   }`}
@@ -92,7 +96,7 @@ export default function NotificationBell() {
                   <p className="text-xs text-neutral-400 dark:text-neutral-600 mt-0.5">
                     {new Date(n.createdAt).toLocaleString()}
                   </p>
-                </div>
+                </Motion.div>
               ))
             )}
           </div>

@@ -1,31 +1,41 @@
-import { useEffect, useState } from 'react'
-import { useWorkspaceStore } from '../store/workspace.store.js'
-import { getWorkspacesApi } from '../api/workspace.api.js'
+import { useEffect, useState } from "react";
+import { useWorkspaceStore } from "../store/workspace.store.js";
+import { getWorkspacesApi } from "../api/workspace.api.js";
 
 export const useWorkspaces = () => {
   const { workspaces, setWorkspaces, activeWorkspace, setActiveWorkspace } =
-    useWorkspaceStore()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+    useWorkspaceStore();
+  const [loading, setLoading] = useState(workspaces.length === 0);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const load = async () => {
       try {
-        const { data } = await getWorkspacesApi()
-        setWorkspaces(data.workspaces)
+        if (workspaces.length === 0) setLoading(true);
+        const { data } = await getWorkspacesApi();
+        if (cancelled) return;
+        setWorkspaces(data.workspaces);
         if (!activeWorkspace && data.workspaces.length > 0) {
-          setActiveWorkspace(data.workspaces[0])
+          setActiveWorkspace(data.workspaces[0]);
         }
       } catch (err) {
-        setError(err)
-        console.error('Failed to load workspaces', err)
+        if (!cancelled) {
+          setError(err);
+          console.error("Failed to load workspaces", err);
+        }
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false);
       }
-    }
-    load()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    };
+    load();
 
-  return { workspaces, activeWorkspace, loading, error }
-}
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return { workspaces, activeWorkspace, loading, error };
+};
