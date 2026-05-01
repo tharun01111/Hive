@@ -20,6 +20,21 @@ const isWorkspaceMember = async (workspaceId, userId) => {
   return Boolean(member);
 };
 
+const shouldUseRedisAdapter = () => {
+  if (!process.env.REDIS_URL) return false;
+
+  try {
+    const url = new URL(process.env.REDIS_URL);
+    const isLocalRedis =
+      url.hostname === "redis" ||
+      url.hostname === "localhost" ||
+      url.hostname === "127.0.0.1";
+    return isLocalRedis || Boolean(url.password);
+  } catch {
+    return false;
+  }
+};
+
 const projectPresence = new Map();
 
 const getPresenceList = (projectId) =>
@@ -90,10 +105,23 @@ export const initSocket = async (httpServer) => {
     path: "/socket.io",
   });
 
-  const pubClient = new Redis(process.env.REDIS_URL);
-  const subClient = pubClient.duplicate();
+  if (shouldUseRedisAdapter()) {
+    const pubClient = new Redis(process.env.REDIS_URL);
+    const subClient = pubClient.duplicate();
 
-  io.adapter(createAdapter(pubClient, subClient));
+    pubClient.on("error", (err) => {
+      console.error("Redis pub client error:", err.message);
+    });
+    subClient.on("error", (err) => {
+      console.error("Redis sub client error:", err.message);
+    });
+
+    io.adapter(createAdapter(pubClient, subClient));
+  } else {
+    console.warn(
+      "Redis adapter disabled. Set REDIS_URL with credentials for multi-instance realtime scaling.",
+    );
+  }
 
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token || socket.handshake.query?.token;

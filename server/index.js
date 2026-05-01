@@ -20,6 +20,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cookieParser());
 
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", service: "hive-server" });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/workspaces", workspaceRoutes);
 app.use("/api/workspaces/:workspaceId/projects", workspaceProjectRoutes);
@@ -28,10 +32,6 @@ app.use("/api/projects/:projectId/messages", messageRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api", activityRoutes);
-
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", service: "hive-server" });
-});
 
 await initSocket(httpServer);
 

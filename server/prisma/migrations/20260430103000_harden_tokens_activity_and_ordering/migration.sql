@@ -3,7 +3,9 @@ BEGIN
   IF EXISTS (
     SELECT 1
     FROM information_schema.columns
-    WHERE table_name = 'refresh_tokens' AND column_name = 'token'
+    WHERE table_schema = 'public'
+      AND table_name = 'refresh_tokens'
+      AND column_name = 'token'
   ) THEN
     ALTER TABLE "refresh_tokens" RENAME COLUMN "token" TO "token_hash";
   END IF;

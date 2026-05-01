@@ -1,22 +1,24 @@
-import path from 'node:path'
-import { defineConfig } from 'prisma/config'
-import { PrismaPg } from '@prisma/adapter-pg'
+import path from "node:path";
+import { defineConfig } from "prisma/config";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { config } from "dotenv";
 
-const isInsideDocker = process.env.RUNNING_IN_DOCKER === 'true'
+config();
 
-const connectionString = isInsideDocker
-  ? 'postgresql://hive:hive_password@postgres:5432/hive_db'
-  : 'postgresql://hive:hive_password@localhost:5432/hive_db'
+const migrationUrl =
+  process.env.DIRECT_URL ??
+  process.env.DATABASE_URL ??
+  "postgresql://placeholder:placeholder@localhost:5432/placeholder";
 
 export default defineConfig({
   earlyAccess: true,
-  schema: path.join('prisma', 'schema.prisma'),
+  schema: path.join("prisma", "schema.prisma"),
   datasource: {
-    url: connectionString,
+    url: migrationUrl,
   },
   migrate: {
     adapter() {
-      return new PrismaPg({ connectionString })
+      return new PrismaPg({ connectionString: migrationUrl });
     },
   },
-})
+});
