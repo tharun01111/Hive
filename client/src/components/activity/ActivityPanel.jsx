@@ -11,13 +11,14 @@ export default function ActivityPanel({ onClose }) {
       className="flex h-full w-80 shrink-0 flex-col border-l border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
     >
       <div className="flex shrink-0 items-center justify-between border-b border-neutral-200 dark:border-neutral-800 px-4 py-3">
-        <p className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">
+        <p className="text-[10px] font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-widest">
           Activity
         </p>
         {onClose && (
           <button
             onClick={onClose}
             className="btn-ghost p-1 text-neutral-400"
+            aria-label="Close"
           >
             <CloseIcon />
           </button>

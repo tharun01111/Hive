@@ -61,7 +61,7 @@ export default function InviteMemberModal({
                 type="button"
                 aria-pressed={role === r}
                 onClick={() => setRole(r)}
-                className={`flex-1 py-2 px-3 rounded-notion text-sm font-medium border transition-colors ${
+                className={`flex-1 py-2 px-3 rounded-premium text-sm font-medium border transition-colors ${
                   role === r
                     ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border-neutral-900 dark:border-white"
                     : "bg-white dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600"
@@ -79,7 +79,7 @@ export default function InviteMemberModal({
         </div>
 
         {error && (
-          <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-notion">
+          <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-premium">
             {error}
           </p>
         )}

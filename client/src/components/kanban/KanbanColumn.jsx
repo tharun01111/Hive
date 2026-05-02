@@ -133,7 +133,7 @@ export default function KanbanColumn({ column, index, projectId }) {
           {/* Column header */}
           <div
             {...provided.dragHandleProps}
-            className="sticky top-0 z-10 flex items-center justify-between bg-neutral-100 dark:bg-neutral-900 px-3 py-2 rounded-t-premium"
+            className="sticky top-0 z-10 flex items-center justify-between bg-neutral-100 dark:bg-neutral-900 px-3 py-2 rounded-t-premium group"
           >
             {editingName ? (
               <form onSubmit={handleRenameColumn} className="flex-1 mr-2">
@@ -146,9 +146,9 @@ export default function KanbanColumn({ column, index, projectId }) {
                 />
               </form>
             ) : (
-              <div
-                onDoubleClick={() => setEditingName(true)}
-                className="flex items-baseline gap-2 overflow-hidden cursor-default group/title"
+              <button
+                onClick={() => setEditingName(true)}
+                className="flex items-baseline gap-2 overflow-hidden cursor-default group/title text-left focus-visible:ring-2 focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600 rounded-sm outline-none"
               >
                 <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate">
                   {column.name}
@@ -159,7 +159,7 @@ export default function KanbanColumn({ column, index, projectId }) {
                 {column.pending && (
                   <span className="inline-flex h-3 w-3 animate-spin rounded-full border border-neutral-300 border-t-neutral-600 dark:border-neutral-700 dark:border-t-neutral-200" />
                 )}
-              </div>
+              </button>
             )}
 
             <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

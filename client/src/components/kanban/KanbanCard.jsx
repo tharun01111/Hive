@@ -3,9 +3,28 @@ import { Draggable } from "@hello-pangea/dnd";
 import CardDetailModal from "./CardDetailModal.jsx";
 import { AvatarStack } from "../ui/Avatar.jsx";
 
+const parseDueDate = (value) => {
+  if (!value) return null;
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(year, month - 1, day, 23, 59, 59, 999);
+  }
+  return new Date(value);
+};
+
+const formatDueDate = (value) => {
+  const date = parseDueDate(value);
+  if (!date) return "";
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+};
+
 export default function KanbanCard({ card, index, projectId }) {
   const [showDetail, setShowDetail] = useState(false);
-  const isOverdue = card.dueDate && new Date(card.dueDate) < new Date();
+  const dueDate = parseDueDate(card.dueDate);
+  const isOverdue = dueDate && dueDate < new Date();
 
   return (
     <>
@@ -55,7 +74,7 @@ export default function KanbanCard({ card, index, projectId }) {
                     }`}
                   >
                     <CalendarIcon />
-                    {new Date(card.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    {formatDueDate(card.dueDate)}
                   </span>
                 )}
               </div>

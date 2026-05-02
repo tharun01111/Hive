@@ -211,8 +211,8 @@ export default function WorkspacePage() {
                             size="sm"
                           />
                           <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500">
-                            {project.members?.length} member
-                            {project.members?.length !== 1 ? "s" : ""}
+                            {(project.members ?? []).length} member
+                            {(project.members ?? []).length !== 1 ? "s" : ""}
                           </span>
                         </div>
                       </button>
@@ -273,7 +273,7 @@ export default function WorkspacePage() {
             />
           </div>
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-notion">
+            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-premium">
               {error}
             </p>
           )}
@@ -335,7 +335,7 @@ export default function WorkspacePage() {
             />
           </div>
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-notion">
+            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-premium">
               {error}
             </p>
           )}
@@ -433,7 +433,7 @@ function WorkspaceProjectsSkeleton() {
       {[0, 1, 2].map((item) => (
         <div
           key={item}
-          className="rounded-notion border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_92%,transparent)] p-5"
+          className="rounded-premium border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_92%,transparent)] p-5"
         >
           <Skeleton className="mb-4 h-8 w-8" />
           <Skeleton className="mb-2 h-4 w-2/3" />

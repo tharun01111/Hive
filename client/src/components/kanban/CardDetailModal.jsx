@@ -208,7 +208,7 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
                       ? handleUnassign(member.userId)
                       : handleAssign(member.userId)
                   }
-                  className={`flex items-center gap-1.5 px-2 py-1 rounded-notion text-xs transition-colors ${
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded-premium text-xs transition-colors ${
                     assigned
                       ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900"
                       : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700"
@@ -229,7 +229,7 @@ export default function CardDetailModal({ card, projectId, isOpen, onClose }) {
 
         {/* Actions */}
         {error && (
-          <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-notion">
+          <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-premium">
             {error}
           </p>
         )}

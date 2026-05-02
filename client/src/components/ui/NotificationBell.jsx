@@ -26,9 +26,16 @@ export default function NotificationBell() {
   const handleOpen = async () => {
     if (!open && bellRef.current) {
       const rect = bellRef.current.getBoundingClientRect();
+      const dropdownWidth = 320;
+      const margin = 8;
+      const desiredLeft = Math.max(
+        margin,
+        Math.min(rect.left - 260, window.innerWidth - dropdownWidth - margin)
+      );
+      
       setDropdownPos({
         top: rect.bottom + 8,
-        left: rect.left - 260,
+        left: desiredLeft,
       });
     }
 
@@ -54,7 +61,7 @@ export default function NotificationBell() {
         <BellIcon />
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-neutral-900 dark:bg-white rounded-full flex items-center justify-center">
-            <span className="text-white text-xs font-medium leading-none">
+            <span className="text-white dark:text-neutral-900 text-xs font-medium leading-none">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           </span>
@@ -64,7 +71,7 @@ export default function NotificationBell() {
       {open && (
         <div
           style={{ top: dropdownPos.top, left: dropdownPos.left }}
-          className="fixed z-50 w-80 overflow-hidden rounded-notion border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_96%,transparent)] shadow-notion-lg backdrop-blur-xl"
+          className="fixed z-50 w-80 overflow-hidden rounded-premium border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_96%,transparent)] shadow-premium-lg backdrop-blur-xl"
         >
           <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-800">
             <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">

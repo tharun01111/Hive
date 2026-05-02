@@ -89,7 +89,7 @@ function ActivityItem({ activity }) {
   const entityName = activity.meta?.title ?? activity.meta?.name ?? "";
 
   return (
-    <div className="flex items-start gap-3 px-1 py-2.5 rounded-notion hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
+    <div className="flex items-start gap-3 px-1 py-2.5 rounded-premium hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors group">
       <div className="w-7 h-7 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0 mt-0.5">
         <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
           {activity.user?.name?.[0]?.toUpperCase()}

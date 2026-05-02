@@ -45,12 +45,13 @@ export default function Modal({
             className={`relative w-full ${sizes[size]} overflow-hidden rounded-premium border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-premium-lg`}
           >
             <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 px-5 py-4">
-              <h2 className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">
+              <h2 className="text-[10px] font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-widest">
                 {title}
               </h2>
               <button
                 onClick={onClose}
                 className="btn-ghost p-1 text-neutral-400"
+                aria-label="Close"
               >
                 <CloseIcon />
               </button>

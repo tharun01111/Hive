@@ -22,7 +22,7 @@ export default function LandingPage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_4%,rgba(62,207,142,0.16),transparent_30%),radial-gradient(circle_at_88%_10%,rgba(90,167,255,0.11),transparent_28%)]" />
       <header className="relative mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-notion bg-[linear-gradient(135deg,var(--hive-accent),#2b7cff)] text-sm font-semibold text-white shadow-[0_0_24px_rgba(62,207,142,0.26)]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-premium bg-[linear-gradient(135deg,var(--hive-accent),#2b7cff)] text-sm font-semibold text-white shadow-[0_0_24px_rgba(62,207,142,0.26)]">
             H
           </div>
           <span className="text-sm font-semibold">Hive</span>
@@ -69,7 +69,7 @@ export default function LandingPage() {
 
         <section className="mt-20 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {features.map(([title, description]) => (
-            <div key={title} className="card group p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--hive-accent)_36%,var(--hive-border))] hover:shadow-notion-md">
+            <div key={title} className="card group p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--hive-accent)_36%,var(--hive-border))] hover:shadow-premium-md">
               <div className="mb-4 h-1 w-10 rounded-full bg-[var(--hive-accent)] shadow-[0_0_16px_rgba(62,207,142,0.38)] transition-all duration-200 group-hover:w-14" />
               <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
                 {title}
@@ -99,7 +99,7 @@ function ProductPreview() {
       transition={{ duration: 0.28, delay: 0.08 }}
       className="relative"
     >
-      <div className="card overflow-hidden shadow-notion-lg">
+      <div className="card overflow-hidden shadow-premium-lg">
         <div className="flex items-center justify-between border-b border-[var(--hive-border)] px-5 py-4">
           <div>
             <p className="text-lg font-semibold">API Redesign</p>
@@ -113,7 +113,7 @@ function ProductPreview() {
           {columns.map(([name, cards], index) => (
             <div
               key={name}
-              className="rounded-notion border border-[var(--hive-border)] border-t-2 border-t-[color-mix(in_srgb,var(--hive-accent)_42%,var(--hive-border))] bg-[color-mix(in_srgb,var(--hive-surface-raised)_92%,transparent)] p-3"
+              className="rounded-premium border border-[var(--hive-border)] border-t-2 border-t-[color-mix(in_srgb,var(--hive-accent)_42%,var(--hive-border))] bg-[color-mix(in_srgb,var(--hive-surface-raised)_92%,transparent)] p-3"
             >
               <div className="mb-3 flex items-center justify-between">
                 <span className="text-xs font-medium">{name}</span>
@@ -141,7 +141,7 @@ function ProductPreview() {
           </div>
           <div className="border-t border-[var(--hive-border)] p-4 text-sm sm:border-l sm:border-t-0">
             <p className="mb-2 text-xs font-medium text-neutral-400">Project chat</p>
-            <div className="rounded-notion border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_86%,transparent)] px-3 py-2 text-xs">
+            <div className="rounded-premium border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_86%,transparent)] px-3 py-2 text-xs">
               Let us keep the board focused today.
             </div>
           </div>

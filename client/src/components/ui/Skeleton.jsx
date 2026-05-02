@@ -1,7 +1,7 @@
 export function Skeleton({ className = "" }) {
   return (
     <div
-      className={`animate-pulse rounded-notion bg-neutral-100 dark:bg-neutral-800 ${className}`}
+      className={`animate-pulse rounded-premium bg-neutral-100 dark:bg-neutral-800 ${className}`}
     />
   );
 }
@@ -12,7 +12,7 @@ export function BoardSkeleton() {
       {[0, 1, 2].map((column) => (
         <div
           key={column}
-          className="w-72 shrink-0 rounded-notion border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-900"
+          className="w-72 shrink-0 rounded-premium border border-neutral-200 bg-neutral-50 p-3 dark:border-neutral-800 dark:bg-neutral-900"
         >
           <div className="mb-4 flex items-center justify-between">
             <Skeleton className="h-4 w-24" />
@@ -83,7 +83,7 @@ export function WorkspacePageSkeleton() {
         {[0, 1, 2, 3, 4, 5].map((item) => (
           <div
             key={item}
-          className="rounded-notion border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_92%,transparent)] p-5"
+          className="rounded-premium border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_92%,transparent)] p-5"
           >
             <Skeleton className="mb-4 h-8 w-8" />
             <Skeleton className="mb-2 h-4 w-2/3" />
