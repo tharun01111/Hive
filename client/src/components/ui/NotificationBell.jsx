@@ -26,9 +26,16 @@ export default function NotificationBell() {
   const handleOpen = async () => {
     if (!open && bellRef.current) {
       const rect = bellRef.current.getBoundingClientRect();
+      const dropdownWidth = 320;
+      const margin = 8;
+      const desiredLeft = Math.max(
+        margin,
+        Math.min(rect.left - 260, window.innerWidth - dropdownWidth - margin)
+      );
+      
       setDropdownPos({
         top: rect.bottom + 8,
-        left: rect.left - 260,
+        left: desiredLeft,
       });
     }
 
@@ -48,7 +55,7 @@ export default function NotificationBell() {
     <div ref={bellRef}>
       <button
         onClick={handleOpen}
-        className="relative p-1.5 rounded-notion hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
+        className="btn-ghost relative p-1.5 text-neutral-400"
         title="Notifications"
       >
         <BellIcon />
@@ -64,7 +71,7 @@ export default function NotificationBell() {
       {open && (
         <div
           style={{ top: dropdownPos.top, left: dropdownPos.left }}
-          className="fixed w-80 card shadow-notion-lg z-50 overflow-hidden"
+          className="fixed z-50 w-80 overflow-hidden rounded-premium border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_96%,transparent)] shadow-premium-lg backdrop-blur-xl"
         >
           <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-800">
             <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">

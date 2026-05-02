@@ -1,6 +1,6 @@
 export default function ChatComposer({ content, onChange, onSend }) {
   return (
-    <div className="px-4 py-3 border-t border-neutral-200 dark:border-neutral-800 shrink-0">
+    <div className="shrink-0 border-t border-neutral-200 dark:border-neutral-800 px-4 py-3">
       <form onSubmit={onSend} className="flex items-end gap-2">
         <textarea
           value={content}
@@ -13,12 +13,12 @@ export default function ChatComposer({ content, onChange, onSend }) {
           }}
           placeholder="Message..."
           rows={1}
-          className="input text-sm resize-none flex-1"
+          className="input text-sm resize-none flex-1 py-2"
         />
         <button
           type="submit"
           disabled={!content.trim()}
-          className="btn-primary px-3 py-2 shrink-0 active:scale-95 transition-transform"
+          className="btn-primary px-3 py-2 shrink-0 transition-colors"
         >
           <SendIcon />
         </button>

@@ -10,24 +10,28 @@ export default function MessageBubble({ message, isMe }) {
       className={`flex gap-2 ${isMe ? "justify-end" : "justify-start"}`}
     >
       {!isMe && <Avatar user={message.user} size="sm" />}
-      <div className={`flex max-w-[85%] flex-col ${isMe ? "items-end" : "items-start"}`}>
+      <div
+        className={`flex max-w-[85%] flex-col ${
+          isMe ? "items-end" : "items-start"
+        }`}
+      >
         {!isMe && (
           <span className="mb-1 px-1 text-xs text-neutral-400 dark:text-neutral-600">
             {message.user?.name}
           </span>
         )}
         <div
-          className={`rounded-notion px-3 py-2 text-sm leading-5 ${
+          className={`rounded-premium px-3 py-2 text-sm leading-relaxed ${
             isMe
               ? message.failed
                 ? "bg-red-500 text-white"
-                : "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
-              : "bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100"
+                : "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-premium"
+              : "border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
           } ${message.pending ? "opacity-80" : ""}`}
         >
           {message.content}
         </div>
-        <span className="mt-0.5 px-1 text-xs text-neutral-300 dark:text-neutral-700">
+        <span className="mt-1 px-1 text-[10px] font-medium text-neutral-300 dark:text-neutral-600 uppercase">
           {message.pending
             ? "Sending..."
             : message.failed

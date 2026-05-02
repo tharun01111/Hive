@@ -12,7 +12,7 @@ export default function EmptyState({
         compact ? "px-3 py-6" : "px-6 py-14"
       }`}
     >
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-notion border border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-premium border border-[color-mix(in_srgb,var(--hive-accent)_24%,var(--hive-border))] bg-[var(--hive-accent-soft)] text-[var(--hive-accent-strong)] shadow-[0_0_24px_rgba(62,207,142,0.12)]">
         {icon}
       </div>
       <h2 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">

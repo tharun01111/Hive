@@ -5,12 +5,59 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --hive-bg: #ffffff;
+    --hive-surface: #ffffff;
+    --hive-surface-raised: #f9f9f9;
+    --hive-border: #e5e7eb;
+    --hive-muted: #6b7280;
+    --hive-accent: #3ecf8e;
+    --hive-accent-strong: #2eaf7d;
+    --hive-accent-soft: rgba(62, 207, 142, 0.1);
+    --hive-info: #3b82f6;
+    --hive-warning: #f59e0b;
+    --hive-danger: #ef4444;
+  }
+
+  .dark {
+    --hive-bg: #0c0c0c;
+    --hive-surface: #0c0c0c;
+    --hive-surface-raised: #161616;
+    --hive-border: #262626;
+    --hive-muted: #a3a3a3;
+    --hive-accent: #3ecf8e;
+    --hive-accent-strong: #34b27b;
+    --hive-accent-soft: rgba(62, 207, 142, 0.06);
+  }
+
   * {
     @apply border-neutral-200 dark:border-neutral-800;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 antialiased;
+    @apply text-neutral-900 dark:text-neutral-100 antialiased;
+
+    background-color: var(--hive-bg);
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    @apply outline-none;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply ring-2 ring-neutral-400 dark:ring-neutral-600 ring-offset-2 ring-offset-white dark:ring-offset-black;
   }
 
   ::-webkit-scrollbar {
@@ -23,92 +70,99 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-neutral-300 dark:bg-neutral-700 rounded-full;
+    @apply bg-neutral-200 dark:bg-neutral-800 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-neutral-400 dark:bg-neutral-600;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    ::before,
-    ::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      scroll-behavior: auto !important;
-      transition-duration: 0.01ms !important;
-    }
+    @apply bg-neutral-300 dark:bg-neutral-700;
   }
 }
 
 @layer components {
   @keyframes card-enter {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .animate-card-enter {
-    animation: card-enter 160ms ease-out both;
+    animation: card-enter 200ms ease-out both;
   }
 
   .btn-primary {
-    @apply bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 
-           px-4 py-2 rounded-notion text-sm font-medium 
-           hover:bg-neutral-700 dark:hover:bg-neutral-100 
-           transition-colors duration-150 disabled:opacity-50 
-           disabled:cursor-not-allowed;
+    @apply px-4 py-2 rounded-premium text-sm font-medium text-white
+           transition-all duration-200 disabled:opacity-50
+           disabled:cursor-not-allowed border border-brand-primary;
+    background-color: var(--hive-accent);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--hive-accent-strong);
+    border-color: var(--hive-accent-strong);
   }
 
   .btn-secondary {
-    @apply bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 
-           px-4 py-2 rounded-notion text-sm font-medium 
-           hover:bg-neutral-200 dark:hover:bg-neutral-700 
-           transition-colors duration-150 disabled:opacity-50 
-           disabled:cursor-not-allowed;
+    @apply px-4 py-2 rounded-premium text-sm font-medium
+           text-neutral-700 dark:text-neutral-300
+           bg-white dark:bg-neutral-900
+           border border-neutral-300 dark:border-neutral-700
+           transition-all duration-200 disabled:opacity-50
+           disabled:cursor-not-allowed shadow-premium;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    @apply bg-neutral-50 dark:bg-neutral-800 border-neutral-400 dark:border-neutral-600;
   }
 
   .btn-ghost {
-    @apply text-neutral-600 dark:text-neutral-400 px-3 py-1.5 rounded-notion text-sm 
-           hover:bg-neutral-100 dark:hover:bg-neutral-800 
-           transition-colors duration-150;
+    @apply text-neutral-600 dark:text-neutral-400 px-3 py-1.5 rounded-premium text-sm 
+           transition-all duration-200;
+  }
+
+  .btn-ghost:hover {
+    @apply text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-800;
   }
 
   .btn-danger {
-    @apply bg-red-500 text-white px-4 py-2 rounded-notion text-sm font-medium 
-           hover:bg-red-600 transition-colors duration-150 
-           disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply text-white px-4 py-2 rounded-premium text-sm font-medium
+           bg-red-600 hover:bg-red-700 transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed border border-red-700;
   }
 
   .input {
-    @apply w-full px-3 py-2 text-sm bg-white dark:bg-neutral-900 
-           border border-neutral-200 dark:border-neutral-800 
-           rounded-notion text-neutral-900 dark:text-neutral-100 
+    @apply w-full px-3 py-2 text-sm
+           border border-neutral-300 dark:border-neutral-700
+           rounded-premium text-neutral-900 dark:text-neutral-100 
+           bg-white dark:bg-neutral-900
            placeholder:text-neutral-400 dark:placeholder:text-neutral-600
-           focus:outline-none focus:ring-2 focus:ring-neutral-900 
-           dark:focus:ring-neutral-100 focus:ring-offset-0
-           transition-colors duration-150;
+           focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600
+           transition-all duration-200;
   }
 
   .card {
-    @apply bg-white dark:bg-neutral-900 border border-neutral-200 
-           dark:border-neutral-800 rounded-notion shadow-notion;
+    @apply rounded-premium bg-white dark:bg-neutral-900
+           border border-neutral-200 dark:border-neutral-800
+           shadow-premium;
+  }
+
+  .surface-panel {
+    @apply bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800;
   }
 
   .sidebar-item {
-    @apply flex items-center gap-2 px-3 py-1.5 rounded-notion text-sm 
+    @apply relative flex items-center gap-2 px-3 py-1.5 rounded-premium text-sm
            text-neutral-600 dark:text-neutral-400 
-           hover:bg-neutral-100 dark:hover:bg-neutral-800 
            hover:text-neutral-900 dark:hover:text-neutral-100
-           transition-colors duration-150 cursor-pointer;
+           hover:bg-neutral-100 dark:hover:bg-neutral-800
+           transition-all duration-200 cursor-pointer;
   }
 
   .sidebar-item-active {
-    @apply sidebar-item bg-neutral-100 dark:bg-neutral-800 
-           text-neutral-900 dark:text-neutral-100 font-medium;
+    @apply sidebar-item text-neutral-900 dark:text-neutral-100 font-medium
+           bg-neutral-100 dark:bg-neutral-800;
+  }
+
+  .sidebar-item-active::before {
+    content: "";
+    @apply absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-brand-primary;
   }
 }

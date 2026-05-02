@@ -3,9 +3,28 @@ import { Draggable } from "@hello-pangea/dnd";
 import CardDetailModal from "./CardDetailModal.jsx";
 import { AvatarStack } from "../ui/Avatar.jsx";
 
+const parseDueDate = (value) => {
+  if (!value) return null;
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(year, month - 1, day, 23, 59, 59, 999);
+  }
+  return new Date(value);
+};
+
+const formatDueDate = (value) => {
+  const date = parseDueDate(value);
+  if (!date) return "";
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+};
+
 export default function KanbanCard({ card, index, projectId }) {
   const [showDetail, setShowDetail] = useState(false);
-  const isOverdue = card.dueDate && new Date(card.dueDate) < new Date();
+  const dueDate = parseDueDate(card.dueDate);
+  const isOverdue = dueDate && dueDate < new Date();
 
   return (
     <>
@@ -18,49 +37,51 @@ export default function KanbanCard({ card, index, projectId }) {
             onClick={() => {
               if (!card.pending) setShowDetail(true);
             }}
-            className={`card animate-card-enter relative overflow-hidden p-3 cursor-pointer group transition-all ${
+            className={`card p-2.5 cursor-pointer group/card ${
               snapshot.isDragging
-                ? "shadow-notion-lg rotate-1"
-                : "hover:-translate-y-0.5 hover:shadow-notion-md"
+                ? "shadow-xl rotate-1 scale-[1.02] ring-1 ring-neutral-200 dark:ring-neutral-700 bg-white dark:bg-neutral-800 z-50 transition-none"
+                : "transition-all duration-150 hover:-translate-y-0.5 hover:shadow-premium hover:border-neutral-300 dark:hover:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
             } ${card.pending ? "pointer-events-none opacity-80" : ""}`}
           >
-            <div
-              className={`absolute left-0 top-0 h-full w-1 ${
-                isOverdue ? "bg-red-500" : "bg-neutral-300 dark:bg-neutral-700"
-              }`}
-            />
             {card.pending && (
-              <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute inset-0 overflow-hidden rounded-premium">
                 <div className="h-full w-full animate-pulse bg-neutral-100/40 dark:bg-neutral-800/30" />
               </div>
             )}
-            <p className="pl-1 text-sm font-medium text-neutral-900 dark:text-neutral-100 leading-snug">
-              {card.title}
-            </p>
+            
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100 leading-tight">
+                {card.title}
+              </p>
+              {/* Progressive actions could go here */}
+            </div>
 
             {card.description && (
-              <p className="pl-1 text-xs text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2 leading-5">
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-500 mt-1 line-clamp-2 leading-relaxed">
                 {card.description}
               </p>
             )}
 
-            <div className="flex items-center justify-between mt-3 pl-1">
-              {/* Due date */}
-              {card.dueDate && (
-                <span
-                  className={`text-xs px-1.5 py-0.5 rounded ${
-                    isOverdue
-                      ? "bg-red-50 dark:bg-red-950/30 text-red-500"
-                      : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400"
-                  }`}
-                >
-                  {new Date(card.dueDate).toLocaleDateString()}
-                </span>
-              )}
+            <div className="flex items-center justify-between mt-3 gap-2">
+              <div className="flex items-center gap-2 overflow-hidden">
+                {/* Due date */}
+                {card.dueDate && (
+                  <span
+                    className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-sm flex items-center gap-1 ${
+                      isOverdue
+                        ? "bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-500/80 border border-red-100/50 dark:border-red-900/30"
+                        : "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-500 border border-neutral-200/50 dark:border-neutral-700/50"
+                    }`}
+                  >
+                    <CalendarIcon />
+                    {formatDueDate(card.dueDate)}
+                  </span>
+                )}
+              </div>
 
               {/* Assignees */}
               {card.assignees?.length > 0 && (
-                <div className="ml-auto">
+                <div className="shrink-0">
                   <AvatarStack
                     members={card.assignees.map((assignee) => assignee.user)}
                     limit={3}
@@ -90,3 +111,15 @@ export default function KanbanCard({ card, index, projectId }) {
     </>
   );
 }
+
+const CalendarIcon = () => (
+  <svg width="10" height="10" viewBox="0 0 14 14" fill="none">
+    <path
+      d="M3 2v2M11 2v2M2 5.5h10M3.5 2h7a1.5 1.5 0 011.5 1.5v8a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 012 11.5v-8A1.5 1.5 0 013.5 2z"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

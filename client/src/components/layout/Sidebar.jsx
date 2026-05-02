@@ -37,10 +37,10 @@ export default function Sidebar({ isOpen, onToggle }) {
 
   if (!isOpen) {
     return (
-      <div className="w-12 border-r border-neutral-200 dark:border-neutral-800 flex flex-col items-center py-4 gap-3">
+      <div className="flex w-12 flex-col items-center gap-3 border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 py-4">
         <button
           onClick={onToggle}
-          className="p-2 rounded-notion hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500"
+          className="btn-ghost p-2 text-neutral-500"
         >
           <ChevronRightIcon />
         </button>
@@ -49,16 +49,16 @@ export default function Sidebar({ isOpen, onToggle }) {
   }
 
   return (
-    <div className="w-60 shrink-0 border-r border-neutral-200 dark:border-neutral-800 flex flex-col h-full">
+    <div className="flex h-full w-60 shrink-0 flex-col border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
       {/* Workspace selector */}
-      <div className="p-3 border-b border-neutral-200 dark:border-neutral-800">
+      <div className="border-b border-neutral-200 dark:border-neutral-800 p-3">
         <div className="flex items-center justify-between">
           <button
             onClick={onToggle}
-            className="flex items-center gap-2 flex-1 px-2 py-1.5 rounded-notion hover:bg-neutral-100 dark:hover:bg-neutral-800 text-left"
+            className="flex flex-1 items-center gap-2 rounded-premium px-2 py-1.5 text-left transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
-            <div className="w-5 h-5 bg-neutral-900 dark:bg-white rounded flex items-center justify-center shrink-0">
-              <span className="text-white dark:text-neutral-900 text-xs font-semibold">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-premium bg-neutral-900 dark:bg-neutral-100">
+              <span className="text-xs font-semibold text-white dark:text-neutral-900">
                 {activeWorkspace?.name?.[0]?.toUpperCase() ?? "H"}
               </span>
             </div>
@@ -74,10 +74,10 @@ export default function Sidebar({ isOpen, onToggle }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
+      <nav className="flex-1 overflow-y-auto p-2 space-y-1">
         {/* Workspaces */}
         <div className="mb-2">
-          <p className="px-3 py-1 text-xs font-medium text-neutral-400 dark:text-neutral-600 uppercase tracking-wider">
+          <p className="px-3 py-1 text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">
             Workspaces
           </p>
           {workspaces.map((ws) => (
@@ -90,8 +90,8 @@ export default function Sidebar({ isOpen, onToggle }) {
                   : "sidebar-item w-full text-left"
               }
             >
-              <div className="w-4 h-4 bg-neutral-200 dark:bg-neutral-700 rounded flex items-center justify-center shrink-0">
-                <span className="text-neutral-600 dark:text-neutral-300 text-xs font-medium">
+              <div className="w-4 h-4 bg-neutral-200 dark:bg-neutral-700 rounded-sm flex items-center justify-center shrink-0">
+                <span className="text-neutral-600 dark:text-neutral-300 text-[10px] font-bold">
                   {ws.name[0].toUpperCase()}
                 </span>
               </div>
@@ -101,49 +101,53 @@ export default function Sidebar({ isOpen, onToggle }) {
         </div>
 
         {/* Projects */}
-        {activeWorkspace && projects.length > 0 && (
+        {activeWorkspace && (
           <div>
-            <p className="px-3 py-1 text-xs font-medium text-neutral-400 dark:text-neutral-600 uppercase tracking-wider">
+            <p className="px-3 py-1 text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">
               Projects
             </p>
-            {projects.map((project) => (
-              <button
-                key={project.id}
-                onClick={() => navigate(`/project/${project.id}`)}
-                className={
-                  project.id === projectId
-                    ? "sidebar-item-active w-full text-left"
-                    : "sidebar-item w-full text-left"
-                }
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600 shrink-0" />
-                <span className="truncate">{project.name}</span>
-              </button>
-            ))}
+            {projects.length > 0 ? (
+              projects.map((project) => (
+                <button
+                  key={project.id}
+                  onClick={() => navigate(`/project/${project.id}`)}
+                  className={
+                    project.id === projectId
+                      ? "sidebar-item-active w-full text-left"
+                      : "sidebar-item w-full text-left"
+                  }
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-600 shrink-0" />
+                  <span className="truncate">{project.name}</span>
+                </button>
+              ))
+            ) : (
+              <p className="px-3 py-1 text-xs text-neutral-400 italic">No projects</p>
+            )}
           </div>
         )}
       </nav>
 
       {/* User */}
-      <div className="p-3 border-t border-neutral-200 dark:border-neutral-800">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center shrink-0">
+      <div className="border-t border-neutral-200 dark:border-neutral-800 p-3">
+        <div className="flex items-center gap-2 rounded-premium border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50 p-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-200 dark:bg-neutral-800">
             <span className="text-xs font-medium text-neutral-600 dark:text-neutral-300">
               {user?.name?.[0]?.toUpperCase()}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100 truncate">
+            <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100 truncate leading-none">
               {user?.name}
             </p>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+            <p className="text-[10px] text-neutral-500 dark:text-neutral-500 truncate mt-1">
               {user?.email}
             </p>
           </div>
           <button
             onClick={handleLogout}
             disabled={loggingOut}
-            className="p-1.5 rounded-notion hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
+            className="btn-ghost p-1.5 text-neutral-400 hover:text-red-500 dark:hover:text-red-400"
             title="Sign out"
           >
             <LogoutIcon />

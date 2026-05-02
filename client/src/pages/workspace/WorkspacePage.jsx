@@ -83,15 +83,15 @@ export default function WorkspacePage() {
           {workspacesLoading ? (
             <WorkspacePageSkeleton />
           ) : (
-          <div className="p-8 max-w-4xl mx-auto">
+          <div className="mx-auto max-w-6xl p-8">
             {/* Header */}
             <div className="flex items-center justify-between gap-4 mb-8">
               <div>
-                <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
                   {activeWorkspace?.name ?? "Welcome to Hive"}
                 </h1>
                 {activeWorkspace?.description && (
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                     {activeWorkspace.description}
                   </p>
                 )}
@@ -100,7 +100,7 @@ export default function WorkspacePage() {
                 {activeWorkspace && (
                   <button
                     onClick={() => setShowMembers(true)}
-                    className="btn-ghost flex items-center gap-1.5"
+                    className="btn-ghost flex items-center gap-1.5 py-1.5 text-xs"
                   >
                     <MembersIcon />
                     Members
@@ -108,14 +108,14 @@ export default function WorkspacePage() {
                 )}
                 <button
                   onClick={() => setShowCreateWorkspace(true)}
-                  className="btn-secondary"
+                  className="btn-secondary py-1.5 text-xs"
                 >
                   New workspace
                 </button>
                 {activeWorkspace && (
                   <button
                     onClick={() => setShowCreateProject(true)}
-                    className="btn-primary"
+                    className="btn-primary py-1.5 text-xs"
                   >
                     New project
                   </button>
@@ -123,9 +123,9 @@ export default function WorkspacePage() {
                 {activeWorkspace && (
                   <button
                     onClick={() => setShowActivity(!showActivity)}
-                    className={`btn-ghost flex items-center gap-1.5 ${
+                    className={`btn-ghost flex items-center gap-1.5 py-1.5 text-xs ${
                       showActivity
-                        ? "text-neutral-900 dark:text-neutral-100"
+                        ? "text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-800"
                         : ""
                     }`}
                   >
@@ -157,7 +157,7 @@ export default function WorkspacePage() {
             {activeWorkspace && (
               <>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                  <h2 className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">
                     Projects
                   </h2>
                 </div>
@@ -165,17 +165,18 @@ export default function WorkspacePage() {
                 {projectsLoading ? (
                   <WorkspaceProjectsSkeleton />
                 ) : projects.length === 0 ? (
-                  <div className="border border-dashed border-neutral-200 dark:border-neutral-800 rounded-notion">
+                  <div className="rounded-premium border border-dashed border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30">
                     <EmptyState
+                      compact
                       icon={<ProjectEmptyIcon />}
                       title="No projects yet"
-                      description="Create your first project and give this workspace a mission."
+                      description="Create your first project"
                       action={
                         <button
                           onClick={() => setShowCreateProject(true)}
-                          className="btn-secondary"
+                          className="btn-secondary py-1.5 px-3 text-xs"
                         >
-                          Create first project
+                          Create project
                         </button>
                       }
                     />
@@ -186,32 +187,32 @@ export default function WorkspacePage() {
                       <button
                         key={project.id}
                         onClick={() => navigate(`/project/${project.id}`)}
-                        className="card p-5 text-left hover:shadow-notion-md transition-shadow duration-150"
+                        className="card group p-5 text-left transition-all duration-200 hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-premium-md"
                       >
                         <div className="flex items-start justify-between mb-3">
-                          <div className="w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-notion flex items-center justify-center">
-                            <span className="text-sm font-medium text-neutral-600 dark:text-neutral-300">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-premium bg-neutral-900 dark:bg-neutral-100 transition-transform duration-200 group-hover:scale-105">
+                            <span className="text-[10px] font-bold text-white dark:text-neutral-900">
                               {project.name[0].toUpperCase()}
                             </span>
                           </div>
                         </div>
-                        <h3 className="text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-1">
+                        <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mb-1">
                           {project.name}
                         </h3>
                         {project.description && (
-                          <p className="text-xs text-neutral-500 dark:text-neutral-400 line-clamp-2">
+                          <p className="text-xs text-neutral-500 dark:text-neutral-400 line-clamp-2 leading-relaxed">
                             {project.description}
                           </p>
                         )}
-                        <div className="mt-3 flex items-center gap-2">
+                        <div className="mt-4 flex items-center gap-2">
                           <AvatarStack
                             members={(project.members ?? []).map((m) => m.user)}
                             limit={3}
                             size="sm"
                           />
-                          <span className="text-xs text-neutral-400 dark:text-neutral-600">
-                            {project.members?.length} member
-                            {project.members?.length !== 1 ? "s" : ""}
+                          <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500">
+                            {(project.members ?? []).length} member
+                            {(project.members ?? []).length !== 1 ? "s" : ""}
                           </span>
                         </div>
                       </button>
@@ -272,7 +273,7 @@ export default function WorkspacePage() {
             />
           </div>
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-notion">
+            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-premium">
               {error}
             </p>
           )}
@@ -334,7 +335,7 @@ export default function WorkspacePage() {
             />
           </div>
           {error && (
-            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-notion">
+            <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-premium">
               {error}
             </p>
           )}
@@ -432,7 +433,7 @@ function WorkspaceProjectsSkeleton() {
       {[0, 1, 2].map((item) => (
         <div
           key={item}
-          className="rounded-notion border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+          className="rounded-premium border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_92%,transparent)] p-5"
         >
           <Skeleton className="mb-4 h-8 w-8" />
           <Skeleton className="mb-2 h-4 w-2/3" />

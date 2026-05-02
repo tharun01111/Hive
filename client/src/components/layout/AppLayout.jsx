@@ -7,7 +7,7 @@ export default function AppLayout({ children, sidebarLoading = false }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white dark:bg-neutral-950">
+    <div className="flex h-screen overflow-hidden bg-[var(--hive-bg)] text-neutral-900 dark:text-neutral-100">
       <AnimatePresence initial={false} mode="wait">
         <Motion.div
           key={sidebarOpen ? "sidebar-open" : "sidebar-closed"}
@@ -27,7 +27,10 @@ export default function AppLayout({ children, sidebarLoading = false }) {
           )}
         </Motion.div>
       </AnimatePresence>
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="relative flex-1 overflow-y-auto">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_50%_0%,rgba(62,207,142,0.08),transparent_58%)]" />
+        <div className="relative h-full">{children}</div>
+      </main>
     </div>
   );
 }

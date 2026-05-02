@@ -43,7 +43,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-10 h-10 bg-neutral-900 dark:bg-white rounded-notion mb-4">
+          <div className="inline-flex items-center justify-center w-10 h-10 bg-neutral-900 dark:bg-white rounded-premium mb-4">
             <span className="text-white dark:text-neutral-900 font-semibold text-lg">
               H
             </span>
@@ -107,7 +107,7 @@ export default function RegisterPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-notion">
+            <p className="text-sm text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-premium">
               {error}
             </p>
           )}

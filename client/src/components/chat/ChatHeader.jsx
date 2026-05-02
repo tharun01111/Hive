@@ -1,19 +1,20 @@
 export default function ChatHeader({ projectName, onClose }) {
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
+    <div className="flex shrink-0 items-center justify-between border-b border-neutral-200 dark:border-neutral-800 px-4 py-3">
       <div>
-        <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+        <p className="text-[10px] font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-widest">
           Project chat
         </p>
         {projectName && (
-          <p className="text-xs text-neutral-400 dark:text-neutral-600">
+          <p className="text-xs font-medium text-neutral-900 dark:text-neutral-100 mt-0.5">
             {projectName}
           </p>
         )}
       </div>
       <button
         onClick={onClose}
-        className="p-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400"
+        className="btn-ghost p-1 text-neutral-400"
+        aria-label="Close"
       >
         <CloseIcon />
       </button>

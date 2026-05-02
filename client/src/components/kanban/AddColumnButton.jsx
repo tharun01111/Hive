@@ -66,7 +66,7 @@ export default function AddColumnButton({ projectId }) {
 
   if (adding) {
     return (
-      <div className="w-72 shrink-0 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-notion p-3">
+      <div className="w-72 shrink-0 rounded-premium border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900/50 p-2 shadow-sm">
         <form onSubmit={handleSubmit} className="space-y-2">
           <input
             autoFocus
@@ -79,10 +79,10 @@ export default function AddColumnButton({ projectId }) {
               }
             }}
             placeholder="Column name..."
-            className="input text-sm"
+            className="input text-sm py-1.5"
           />
           <div className="flex items-center gap-2">
-            <button type="submit" className="btn-primary py-1 px-3 text-xs">
+            <button type="submit" className="btn-primary py-1 px-3 text-[11px]">
               Add column
             </button>
             <button
@@ -91,7 +91,7 @@ export default function AddColumnButton({ projectId }) {
                 setAdding(false);
                 setName("");
               }}
-              className="btn-ghost py-1 px-2 text-xs"
+              className="btn-ghost py-1 px-2 text-[11px]"
             >
               Cancel
             </button>
@@ -104,10 +104,10 @@ export default function AddColumnButton({ projectId }) {
   return (
     <button
       onClick={() => setAdding(true)}
-      className="w-72 shrink-0 flex items-center gap-2 px-3 py-2.5 rounded-notion border border-dashed border-neutral-300 dark:border-neutral-700 text-neutral-400 dark:text-neutral-600 hover:border-neutral-400 dark:hover:border-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors text-sm"
+      className="flex w-72 shrink-0 items-center gap-2 rounded-premium border border-dashed border-neutral-300 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/30 px-3 py-2 text-sm text-neutral-500 dark:text-neutral-500 transition-all duration-150 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-700 shadow-sm"
     >
       <PlusIcon />
-      Add column
+      <span className="font-medium">Add column</span>
     </button>
   );
 }
