@@ -63,7 +63,7 @@ export function ActivitySkeleton() {
 
 export function WorkspacePageSkeleton() {
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="mx-auto max-w-6xl p-8">
       <div className="mb-8 flex items-center justify-between gap-4">
         <div className="space-y-3">
           <Skeleton className="h-8 w-56" />
@@ -83,7 +83,7 @@ export function WorkspacePageSkeleton() {
         {[0, 1, 2, 3, 4, 5].map((item) => (
           <div
             key={item}
-            className="rounded-notion border border-neutral-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900"
+          className="rounded-notion border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_92%,transparent)] p-5"
           >
             <Skeleton className="mb-4 h-8 w-8" />
             <Skeleton className="mb-2 h-4 w-2/3" />
@@ -102,15 +102,15 @@ export function WorkspacePageSkeleton() {
 export function SidebarSkeleton({ collapsed = false }) {
   if (collapsed) {
     return (
-      <div className="flex w-12 flex-col items-center gap-3 border-r border-neutral-200 py-4 dark:border-neutral-800">
+      <div className="flex w-12 flex-col items-center gap-3 border-r border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface)_86%,transparent)] py-4">
         <Skeleton className="h-8 w-8" />
       </div>
     );
   }
 
   return (
-    <div className="flex h-full w-60 shrink-0 flex-col border-r border-neutral-200 dark:border-neutral-800">
-      <div className="border-b border-neutral-200 p-3 dark:border-neutral-800">
+    <div className="flex h-full w-60 shrink-0 flex-col border-r border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface)_86%,transparent)]">
+      <div className="border-b border-[var(--hive-border)] p-3">
         <div className="flex items-center justify-between">
           <div className="flex flex-1 items-center gap-2">
             <Skeleton className="h-5 w-5" />
@@ -132,7 +132,7 @@ export function SidebarSkeleton({ collapsed = false }) {
           <Skeleton className="h-8 w-full" />
         </div>
       </div>
-      <div className="border-t border-neutral-200 p-3 dark:border-neutral-800">
+      <div className="border-t border-[var(--hive-border)] p-3">
         <div className="flex items-center gap-2">
           <Skeleton className="h-7 w-7 rounded-full" />
           <div className="flex-1 space-y-2">

@@ -27,44 +27,49 @@ export default function ProjectPage() {
       <div className="flex h-full">
         <div className="flex-1 flex flex-col min-w-0">
           {/* Project header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-                {activeProject?.name ?? "Loading project"}
-              </h1>
-              {activeProject?.description && (
-                <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-                  {activeProject.description}
-                </p>
-              )}
-              <div className="mt-3 flex items-center gap-3 text-xs text-neutral-400 dark:text-neutral-600">
-                <span>{activeProject?.members?.length ?? 0} members</span>
-                <span className="h-1 w-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />
-                <span>{onlineUsers.length} online</span>
-                {onlineUsers.length > 0 && (
-                  <AvatarStack members={onlineUsers} limit={4} size="sm" />
+          <div className="shrink-0 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-6 py-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                  {activeProject?.name ?? "Loading project"}
+                </h1>
+                {activeProject?.description && (
+                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                    {activeProject.description}
+                  </p>
                 )}
+                <div className="mt-3 flex items-center gap-3 text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                  <span>{activeProject?.members?.length ?? 0} members</span>
+                  <span className="h-1 w-1 rounded-full bg-neutral-300 dark:bg-neutral-700" />
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-primary" />
+                    {onlineUsers.length} online
+                  </span>
+                  {onlineUsers.length > 0 && (
+                    <AvatarStack members={onlineUsers} limit={4} size="sm" />
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowMembers(true)}
-                className="btn-secondary flex items-center gap-1.5"
-              >
-                <MembersIcon />
-                Members
-              </button>
-              <button
-                onClick={() => setChatOpen(!chatOpen)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-notion text-sm transition-colors ${
-                  chatOpen
-                    ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900"
-                    : "btn-secondary"
-                }`}
-              >
-                <ChatIcon />
-                Chat
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowMembers(true)}
+                  className="btn-secondary flex items-center gap-1.5 py-1.5 text-xs"
+                >
+                  <MembersIcon />
+                  Members
+                </button>
+                <button
+                  onClick={() => setChatOpen(!chatOpen)}
+                  className={`flex items-center gap-2 rounded-premium px-3 py-1.5 text-xs font-medium transition-all ${
+                    chatOpen 
+                      ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 border border-neutral-900 dark:border-white" 
+                      : "btn-secondary"
+                  }`}
+                >
+                  <ChatIcon />
+                  Chat
+                </button>
+              </div>
             </div>
           </div>
 

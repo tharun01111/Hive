@@ -8,16 +8,16 @@ export default function ActivityPanel({ onClose }) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 18 }}
       transition={{ duration: 0.18 }}
-      className="w-80 shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col h-full bg-white dark:bg-neutral-950"
+      className="flex h-full w-80 shrink-0 flex-col border-l border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
     >
-      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
-        <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+      <div className="flex shrink-0 items-center justify-between border-b border-neutral-200 dark:border-neutral-800 px-4 py-3">
+        <p className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">
           Activity
         </p>
         {onClose && (
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400"
+            className="btn-ghost p-1 text-neutral-400"
           >
             <CloseIcon />
           </button>

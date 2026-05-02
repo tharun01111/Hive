@@ -96,7 +96,7 @@ export default function ChatPanel({ projectId, onClose }) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 18 }}
       transition={{ duration: 0.18 }}
-      className="w-80 shrink-0 border-l border-neutral-200 dark:border-neutral-800 flex flex-col h-full bg-white dark:bg-neutral-950"
+      className="flex h-full w-80 shrink-0 flex-col border-l border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-premium-lg"
     >
       <ChatHeader projectName={activeProject?.name} onClose={onClose} />
       <MessageList
@@ -109,7 +109,11 @@ export default function ChatPanel({ projectId, onClose }) {
         messagesEndRef={messagesEndRef}
       />
       <TypingIndicator users={typingUsers} />
-      <ChatComposer content={content} onChange={handleTyping} onSend={handleSend} />
+      <ChatComposer
+        content={content}
+        onChange={handleTyping}
+        onSend={handleSend}
+      />
     </Motion.aside>
   );
 }

@@ -48,13 +48,13 @@ export default function NotificationBell() {
     <div ref={bellRef}>
       <button
         onClick={handleOpen}
-        className="relative p-1.5 rounded-notion hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
+        className="btn-ghost relative p-1.5 text-neutral-400"
         title="Notifications"
       >
         <BellIcon />
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-neutral-900 dark:bg-white rounded-full flex items-center justify-center">
-            <span className="text-white dark:text-neutral-900 text-xs font-medium leading-none">
+            <span className="text-white text-xs font-medium leading-none">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           </span>
@@ -64,7 +64,7 @@ export default function NotificationBell() {
       {open && (
         <div
           style={{ top: dropdownPos.top, left: dropdownPos.left }}
-          className="fixed w-80 card shadow-notion-lg z-50 overflow-hidden"
+          className="fixed z-50 w-80 overflow-hidden rounded-notion border border-[var(--hive-border)] bg-[color-mix(in_srgb,var(--hive-surface-raised)_96%,transparent)] shadow-notion-lg backdrop-blur-xl"
         >
           <div className="px-4 py-3 border-b border-neutral-100 dark:border-neutral-800">
             <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">

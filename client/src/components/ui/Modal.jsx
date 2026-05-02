@@ -34,23 +34,23 @@ export default function Modal({
           transition={{ duration: 0.16 }}
         >
           <div
-            className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-neutral-950/60"
             onClick={onClose}
           />
           <Motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            initial={{ opacity: 0, scale: 0.98, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            exit={{ opacity: 0, scale: 0.98, y: 8 }}
             transition={{ duration: 0.18 }}
-            className={`relative w-full ${sizes[size]} card shadow-notion-lg`}
+            className={`relative w-full ${sizes[size]} overflow-hidden rounded-premium border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-premium-lg`}
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100 dark:border-neutral-800">
-              <h2 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+            <div className="flex items-center justify-between border-b border-neutral-200 dark:border-neutral-800 px-5 py-4">
+              <h2 className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">
                 {title}
               </h2>
               <button
                 onClick={onClose}
-                className="p-1 rounded-notion hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400"
+                className="btn-ghost p-1 text-neutral-400"
               >
                 <CloseIcon />
               </button>

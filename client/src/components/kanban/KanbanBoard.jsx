@@ -70,7 +70,7 @@ export default function KanbanBoard({ projectId }) {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className="flex gap-3 p-6 h-full overflow-x-auto items-start"
+            className="flex h-full items-start gap-3 overflow-x-auto bg-neutral-50 dark:bg-black p-6"
           >
             {columns.length === 0 ? (
               <div className="flex h-full min-w-full items-center justify-center">

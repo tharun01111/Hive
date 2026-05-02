@@ -13,7 +13,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={handleToggle}
-      className="p-1.5 rounded-notion hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors"
+      className="btn-ghost p-1.5 text-neutral-400"
       title="Toggle theme"
     >
       {theme === "dark" ? <SunIcon /> : <MoonIcon />}
