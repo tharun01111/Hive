@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useProjectStore } from "../../store/project.store.js";
-import { inviteProjectMemberApi } from "../../api/project.api.js";
+import {
+  inviteProjectMemberApi,
+  removeProjectMemberApi,
+} from "../../api/project.api.js";
 import Modal from "../ui/Modal.jsx";
 import MemberList from "./MemberList.jsx";
 import InviteMemberModal from "./InviteMemberModal.jsx";
@@ -28,6 +31,21 @@ export default function ProjectMembersModal({ isOpen, onClose }) {
     updateProject(activeProject.id, updated);
   };
 
+  const handleRemove = async (userId) => {
+    if (!window.confirm("Remove this member from the project?")) return;
+
+    try {
+      await removeProjectMemberApi(activeProject.id, userId);
+      const updated = {
+        ...activeProject,
+        members: members.filter((m) => m.user.id !== userId),
+      };
+      updateProject(activeProject.id, updated);
+    } catch (err) {
+      console.error("Failed to remove project member", err);
+    }
+  };
+
   return (
     <>
       <Modal
@@ -53,7 +71,7 @@ export default function ProjectMembersModal({ isOpen, onClose }) {
 
           <MemberList
             members={members}
-            onRemove={() => {}}
+            onRemove={handleRemove}
             currentUserRole={currentUserRole}
           />
         </div>

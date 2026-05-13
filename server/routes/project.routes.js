@@ -4,6 +4,7 @@ import {
   updateProjectController,
   deleteProjectController,
   inviteProjectMemberController,
+  removeProjectMemberController,
 } from "../controllers/project.controller.js";
 import { authenticate } from "../middleware/auth.js";
 import {
@@ -40,6 +41,12 @@ router.post(
   validate(projectSchemas.invite),
   requireProjectAdmin,
   inviteProjectMemberController,
+);
+router.delete(
+  "/:projectId/members/:userId",
+  validate(projectSchemas.removeMember),
+  requireProjectAdmin,
+  removeProjectMemberController,
 );
 
 export default router;

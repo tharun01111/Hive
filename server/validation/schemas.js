@@ -97,6 +97,9 @@ export const projectSchemas = {
       role,
     }),
   }),
+  removeMember: z.object({
+    params: z.object({ projectId: uuid, userId: uuid }),
+  }),
 };
 
 export const kanbanSchemas = {
