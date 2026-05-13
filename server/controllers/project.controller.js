@@ -5,6 +5,7 @@ import {
   updateProject,
   deleteProject,
   inviteProjectMember,
+  removeProjectMember,
 } from "../services/project.service.js";
 import { handle } from "../utils/controllerHandler.js";
 
@@ -53,4 +54,9 @@ export const inviteProjectMemberController = handle(async (req, res) => {
     role,
   });
   return res.status(201).json({ member });
+});
+
+export const removeProjectMemberController = handle(async (req, res) => {
+  await removeProjectMember(req.params.projectId, req.params.userId, req.userId);
+  return res.status(200).json({ message: "Member removed from project" });
 });

@@ -105,6 +105,7 @@ export const initSocket = async (httpServer) => {
     path: "/socket.io",
   });
 
+  //yet to implement
   if (shouldUseRedisAdapter()) {
     const pubClient = new Redis(process.env.REDIS_URL);
     const subClient = pubClient.duplicate();

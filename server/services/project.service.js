@@ -103,3 +103,13 @@ export const inviteProjectMember = async (projectId, { email, role }) => {
     },
   });
 };
+
+export const removeProjectMember = async (projectId, userId, requestingUserId) => {
+  if (userId === requestingUserId) {
+    throw { status: 400, message: "You cannot remove yourself" };
+  }
+
+  return prisma.projectMember.delete({
+    where: { projectId_userId: { projectId, userId } },
+  });
+};

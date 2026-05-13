@@ -219,6 +219,15 @@ export default function KanbanColumn({ column, index, projectId }) {
                     />
                   </div>
                 )}
+                {column.cards?.length > 0 && !addingCard && (
+                  <button
+                    onClick={() => setAddingCard(true)}
+                    className="flex w-full items-center gap-2 rounded-premium border border-dashed border-neutral-300 dark:border-neutral-700 bg-neutral-50/60 dark:bg-neutral-900/30 px-3 py-2 text-left text-sm font-medium text-neutral-500 dark:text-neutral-500 transition-all duration-150 hover:border-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/60 dark:hover:text-neutral-300"
+                  >
+                    <PlusIcon />
+                    <span>Add task</span>
+                  </button>
+                )}
 
                 {/* Add card inline form */}
                 {addingCard && (
